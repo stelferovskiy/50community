@@ -1,0 +1,88 @@
+/* ========================================================
+   [.50] COMMUNITY // TACTICAL STYLESHEET (style.css)
+   ======================================================== */
+
+/* Tactical Background Pattern */
+body {
+  background-color: #090a0d;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(229, 9, 20, 0.12) 0%, transparent 60%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  color: #e2e8f0;
+  overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Tactical Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090a0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #dc2626;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ef4444;
+}
+
+/* Glowing Accent Classes */
+.glow-red {
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.35);
+}
+.glow-gold {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+.glow-twitch {
+  box-shadow: 0 0 18px rgba(145, 70, 255, 0.45);
+}
+.glow-telegram {
+  box-shadow: 0 0 14px rgba(34, 158, 217, 0.45);
+}
+.glow-youtube {
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+}
+.text-glow-red {
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+}
+
+/* Tactical HUD Scanline Pattern */
+.hud-scanline {
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+/* Interactive Map Canvas Drag & Zoom */
+.map-canvas-container {
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.map-canvas-container:active {
+  cursor: grabbing;
+}
+
+/* Pulse Animation for Live Streaming & Bosses */
+@keyframes livePulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 8px #ef4444); }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+.live-dot-pulse {
+  animation: livePulse 1.6s infinite ease-in-out;
+}
+
+/* Synchronizing Spin Animation */
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+.spin-sync {
+  animation: spin 1s linear infinite;
+}

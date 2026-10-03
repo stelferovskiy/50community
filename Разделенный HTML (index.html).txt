@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[.50] COMMUNITY // Arena Breakout: Infinite Community</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Chakra Petch & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Supabase Cloud PostgreSQL Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              black: '#090a0d',
+              dark: '#0e1017',
+              card: '#141722',
+              cardHover: '#1c2030',
+              border: '#2a151b',
+              red: '#e50914',
+              crimson: '#ff1e27',
+              accent: '#ff3344',
+              gold: '#f59e0b',
+              emerald: '#10b981',
+              gray: '#8a93a6',
+              purple: '#9146FF',
+              purpleDark: '#772ce8',
+              purpleHover: '#a970ff'
+            }
+          },
+          fontFamily: {
+            tactical: ['"Chakra Petch"', 'sans-serif'],
+            sans: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Внешний файл стилей -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
+
+  <!-- Primary Navigation Header -->
+  <header class="sticky top-0 z-40 bg-tactical-dark/95 backdrop-blur border-b border-red-900/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        
+        <!-- Logo / Clan Brand -->
+        <div class="flex items-center space-x-3 cursor-pointer group" onclick="navigateTo('home')">
+          <div class="relative w-11 h-11 sm:w-13 sm:h-13 rounded-xl p-0.5 flex items-center justify-center glow-red bg-gradient-to-b from-red-600/40 via-tactical-card to-tactical-black border border-red-500/60 overflow-hidden shadow-lg transition-transform group-hover:scale-105">
+            <img src="logo.png" alt="[.50] COMMUNITY" class="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(229,9,20,0.6)]" onerror="if(!this.dataset.triedJpg){ this.dataset.triedJpg=true; this.src='logo.jpg'; } else { this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden'); }">
+            
+            <!-- High-Detail SVG Crest Fallback -->
+            <div class="hidden w-full h-full flex items-center justify-center p-0.5">
+              <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="15" y1="15" x2="85" y2="85" stroke="#9ca3af" stroke-width="4" stroke-linecap="round"/>
+                <line x1="85" y1="15" x2="15" y2="85" stroke="#9ca3af" stroke-width="4" stroke-linecap="round"/>
+                <polygon points="50,6 88,20 84,72 50,94 16,72 12,20" fill="#0d1017" stroke="#e50914" stroke-width="3"/>
+                <polygon points="50,12 82,24 78,68 50,87 22,68 18,24" fill="#141722" stroke="#d1d5db" stroke-width="1.5"/>
+                <path d="M50 18 C36 18 30 26 28 38 C28 48 31 56 34 60 L66 60 C69 56 72 48 72 38 C70 26 64 18 50 18 Z" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
+                <path d="M33 36 C33 34 37 32 50 32 C63 32 67 34 67 36 L65 47 C65 50 61 52 50 52 C39 52 35 50 35 47 Z" fill="#0a0c10" stroke="#e50914" stroke-width="1.5"/>
+                <rect x="18" y="66" width="64" height="18" rx="3" fill="#090a0d" stroke="#e50914" stroke-width="2"/>
+                <text x="50" y="79" fill="#ffffff" font-family="'Chakra Petch', sans-serif" font-weight="900" font-size="11" text-anchor="middle" letter-spacing="0.5">[.50]</text>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span id="nav-clan-tag" class="bg-red-600/30 border border-red-500/50 text-red-400 text-[10px] px-1.5 py-0.2 rounded font-tactical font-bold">[.50]</span>
+              <span id="nav-clan-name" class="font-tactical font-bold text-lg sm:text-2xl text-white tracking-wider">[.50] COMMUNITY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 font-tactical">
+          <button onclick="navigateTo('maps')" id="nav-btn-maps" class="nav-btn px-4 py-2 rounded-md text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition flex items-center space-x-2 border border-transparent">
+            <i class="fa-solid fa-map-location-dot text-red-500"></i>
+            <span>Интерактивные Карты</span>
+          </button>
+
+          <button onclick="navigateTo('rules')" id="nav-btn-rules" class="nav-btn px-4 py-2 rounded-md text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition flex items-center space-x-2 border border-transparent">
+            <i class="fa-solid fa-file-shield text-red-500"></i>
+            <span>Регламент</span>
+          </button>
+
+          <button onclick="navigateTo('members')" id="nav-btn-members" class="nav-btn px-4 py-2 rounded-md text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition flex items-center space-x-2 border border-transparent">
+            <i class="fa-solid fa-users-viewfinder text-red-500"></i>
+            <span>[.50] Members</span>
+            <span id="nav-members-count-badge" class="ml-1 text-[10px] bg-red-955/80 border border-red-700/60 text-red-400 px-1.5 py-0.5 rounded font-mono font-bold">154</span>
+          </button>
+
+          <button onclick="navigateTo('media')" id="nav-btn-media" class="nav-btn px-4 py-2 rounded-md text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition flex items-center space-x-2 border border-transparent">
+            <i class="fa-brands fa-twitch text-purple-400"></i>
+            <span>Media HUB</span>
+            <span id="nav-media-live-badge" class="ml-1 text-[10px] bg-purple-950/80 border border-purple-700/60 text-purple-300 px-1.5 py-0.5 rounded font-mono font-bold flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span> LIVE
+            </span>
+          </button>
+
+          <!-- User Auth Status Button -->
+          <div id="nav-auth-container" class="ml-2"></div>
+
+          <a id="nav-discord-link" href="https://discord.com/invite/50community" target="_blank" rel="noopener noreferrer" class="ml-2 px-4 py-2 rounded-md text-sm font-bold bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white transition flex items-center space-x-2 glow-red shadow-lg transform active:scale-95">
+            <i class="fa-brands fa-discord text-base"></i>
+            <span>ДИСКОРД</span>
+          </a>
+        </nav>
+
+        <!-- Mobile Drawer Toggle Button -->
+        <div class="flex md:hidden items-center space-x-2">
+          <div id="mobile-auth-quick-container"></div>
+          <button onclick="toggleMobileNav()" class="p-2.5 rounded-lg bg-tactical-card border border-red-900/50 text-gray-300 hover:text-white focus:outline-none">
+            <i id="mobile-menu-icon" class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer View -->
+    <div id="mobile-menu" class="hidden md:hidden bg-tactical-dark border-b border-red-900/40 px-4 pt-3 pb-5 space-y-2">
+      <div id="mobile-auth-wrapper" class="pb-2 border-b border-white/5"></div>
+      <button onclick="navigateTo('maps'); toggleMobileNav();" class="w-full text-left px-4 py-3 rounded-lg text-sm font-tactical font-semibold flex items-center space-x-3 text-gray-300 hover:bg-white/5 border border-transparent">
+        <i class="fa-solid fa-map-location-dot text-red-500"></i>
+        <span>Интерактивные Карты</span>
+      </button>
+      <button onclick="navigateTo('rules'); toggleMobileNav();" class="w-full text-left px-4 py-3 rounded-lg text-sm font-tactical font-semibold flex items-center space-x-3 text-gray-300 hover:bg-white/5 border border-transparent">
+        <i class="fa-solid fa-file-shield text-red-500"></i>
+        <span>Регламент</span>
+      </button>
+      <button onclick="navigateTo('members'); toggleMobileNav();" class="w-full text-left px-4 py-3 rounded-lg text-sm font-tactical font-semibold flex items-center justify-between text-gray-300 hover:bg-white/5 border border-transparent">
+        <div class="flex items-center space-x-3">
+          <i class="fa-solid fa-users-viewfinder text-red-500"></i>
+          <span>[.50] Members</span>
+        </div>
+        <span class="text-[10px] bg-red-955/80 border border-red-700/60 text-red-400 px-2 py-0.5 rounded font-mono font-bold">154</span>
+      </button>
+      <button onclick="navigateTo('media'); toggleMobileNav();" class="w-full text-left px-4 py-3 rounded-lg text-sm font-tactical font-semibold flex items-center justify-between text-gray-300 hover:bg-white/5 border border-transparent">
+        <div class="flex items-center space-x-3">
+          <i class="fa-brands fa-twitch text-purple-400"></i>
+          <span>Media HUB</span>
+        </div>
+        <span class="text-[10px] bg-purple-950/80 border border-purple-700/60 text-purple-300 px-2 py-0.5 rounded font-mono font-bold">LIVE</span>
+      </button>
+      <a href="https://discord.com/invite/50community" target="_blank" class="w-full text-center block py-3 rounded-lg text-sm font-tactical font-bold bg-red-600 text-white shadow">
+        <i class="fa-brands fa-discord mr-2"></i> Войти в Discord сообщество
+      </a>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-3 pointer-events-none"></div>
+
+  <!-- MAIN VIEWPORT -->
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- TAB 1: HOME PAGE -->
+    <div id="tab-home" class="space-y-12 block">
+      <section class="relative rounded-2xl overflow-hidden border border-red-900/50 bg-gradient-to-r from-tactical-card via-[#161217] to-tactical-black p-6 sm:p-10 lg:p-12 shadow-2xl">
+        <div class="absolute inset-0 hud-scanline opacity-40"></div>
+        <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 max-w-4xl space-y-6">
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-tactical tracking-tight text-white leading-tight">
+            ДОБРО ПОЖАЛОВАТЬ НА САЙТ <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-500 to-red-700 text-glow-red">
+              СООБЩЕСТВА [.50]
+            </span>
+          </h1>
+
+          <p id="hero-slogan-desc" class="text-gray-300 text-base sm:text-lg max-w-3xl leading-relaxed">
+            Мы рады тебя видеть на информационном сайте нашего коммьюнити. Мы сообщество игроков, которое продвигает активный геймплей в AB:I, наш турнирный состав принимает участие в официальных турнирах, а в обычные дни мы сохраняем приятный вайб комфортной игры с людьми, которые могут стать тебе друзьями. Присоединяйтесь!
+          </p>
+
+          <div class="flex flex-wrap gap-4 pt-2">
+            <button onclick="navigateTo('rules')" class="px-6 py-3.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-tactical font-bold tracking-wide transition flex items-center space-x-2 glow-red active:scale-95 shadow-lg">
+              <i class="fa-solid fa-file-shield text-lg"></i>
+              <span>РЕГЛАМЕНТ ПОДРАЗДЕЛЕНИЯ</span>
+            </button>
+            
+            <a id="hero-discord-join-btn" href="https://discord.com/invite/50community" target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 rounded-lg bg-tactical-card hover:bg-tactical-cardHover text-gray-200 border border-red-700/40 hover:border-red-500 font-tactical font-bold tracking-wide transition flex items-center space-x-2 shadow-lg group">
+              <i class="fa-brands fa-discord text-red-400 group-hover:text-red-300 text-lg"></i>
+              <span>СТАТЬ ЧАСТЬЮ СООБЩЕСТВА</span>
+            </a>
+
+            <button onclick="navigateTo('media')" class="px-5 py-3.5 rounded-lg bg-purple-950/60 hover:bg-purple-900/80 border border-purple-600/60 hover:border-purple-400 text-purple-200 font-tactical font-bold tracking-wide transition flex items-center space-x-2 shadow-lg glow-twitch">
+              <i class="fa-brands fa-twitch text-purple-400 text-lg"></i>
+              <span>MEDIA HUB</span>
+            </button>
+          </div>
+
+          <div class="flex items-center space-x-3 pt-2 text-xs text-gray-400 font-tactical">
+            <span class="flex h-2.5 w-2.5 relative">
+              <span id="hero-recruitment-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span id="hero-recruitment-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span>Статус набора: <strong id="hero-recruitment-text" class="text-emerald-400 uppercase">ОТКРЫТ</strong></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 Tracked Roles Grid -->
+      <section id="home-role-stats-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></section>
+
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-tactical-card border border-red-900/30 rounded-2xl p-6 sm:p-8">
+            <div class="flex items-center space-x-3 mb-4">
+              <span class="w-1.5 h-6 bg-red-600 rounded-full"></span>
+              <h2 class="text-xl sm:text-2xl font-bold font-tactical text-white uppercase tracking-wide">
+                Кто мы такие?
+              </h2>
+            </div>
+            
+            <p class="text-gray-300 leading-relaxed text-sm sm:text-base">
+              Мы коммьюнити игроков, которое продвигает агрессивную игру, без кустовых посиделок и просмотра тиктока в катке. Пытаемся объединить большое количество людей в одну дружную семью, где всегда будет с кем поиграть, что-то обсудить и просто поговорить по душам.
+            </p>
+
+            <div class="mt-8 pt-6 border-t border-red-900/20 space-y-4">
+              <div class="flex items-center space-x-2.5">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <h3 class="text-base sm:text-lg font-bold font-tactical text-white uppercase tracking-wide">
+                  Основные правила
+                </h3>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                <div class="flex items-start space-x-3 p-3.5 rounded-xl bg-tactical-dark/70 border border-red-900/30">
+                  <div class="w-7 h-7 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-tactical font-bold text-xs shrink-0 mt-0.5">1</div>
+                  <div>
+                    <h4 class="font-tactical font-bold text-white text-xs uppercase text-red-400">Взаимоуважение</h4>
+                    <p class="text-xs text-gray-300 mt-1 leading-relaxed">Отсутствие токсичности по отношению к людям в сообществе и в медиа пространстве.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start space-x-3 p-3.5 rounded-xl bg-tactical-dark/70 border border-red-900/30">
+                  <div class="w-7 h-7 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-tactical font-bold text-xs shrink-0 mt-0.5">2</div>
+                  <div>
+                    <h4 class="font-tactical font-bold text-white text-xs uppercase text-red-400">Стиль боя</h4>
+                    <p class="text-xs text-gray-300 mt-1 leading-relaxed">Пропаганда активной игры.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start space-x-3 p-3.5 rounded-xl bg-tactical-dark/70 border border-red-900/30">
+                  <div class="w-7 h-7 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-tactical font-bold text-xs shrink-0 mt-0.5">3</div>
+                  <div>
+                    <h4 class="font-tactical font-bold text-white text-xs uppercase text-red-400">Дисциплина</h4>
+                    <p class="text-xs text-gray-300 mt-1 leading-relaxed">Строгое соблюдение регламента и внутренних правил.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start space-x-3 p-3.5 rounded-xl bg-tactical-dark/70 border border-red-900/30">
+                  <div class="w-7 h-7 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-tactical font-bold text-xs shrink-0 mt-0.5">4</div>
+                  <div>
+                    <h4 class="font-tactical font-bold text-white text-xs uppercase text-red-400">Атмосфера</h4>
+                    <p class="text-xs text-gray-300 mt-1 leading-relaxed">Позитив :)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discord Feed & Regulations Quick Access -->
+        <div class="space-y-6">
+          <div class="bg-tactical-card border border-red-900/30 rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+              <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <h4 class="text-base font-bold font-tactical text-white uppercase tracking-wide flex items-center space-x-2">
+                  <i class="fa-brands fa-discord text-red-500"></i>
+                  <span>Сводка Новостей Discord</span>
+                </h4>
+              </div>
+
+              <div class="flex items-center space-x-2">
+                <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-700/60 px-2 py-0.5 rounded flex items-center space-x-1">
+                  <i class="fa-solid fa-satellite-dish mr-1 text-[10px] animate-pulse"></i>
+                  <span>#новости-штаба</span>
+                </span>
+                <button onclick="syncDiscordLiveFeed(true)" class="p-1 px-2 rounded bg-black/60 hover:bg-black/90 border border-red-900/60 text-red-400 hover:text-white transition text-xs" title="Обновить сообщения">
+                  <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="home-news-container" class="space-y-3 max-h-64 sm:max-h-72 overflow-y-auto pr-1"></div>
+          </div>
+
+          <div class="bg-gradient-to-br from-[#1c131a] to-tactical-card border border-red-700/40 rounded-2xl p-6 space-y-3">
+            <div class="flex items-center space-x-2 text-red-400 font-mono text-xs">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>ДИСЦИПЛИНА & УСТАВ</span>
+            </div>
+            <h3 class="text-lg font-tactical font-bold text-white uppercase">Регламент сообщества [.50]</h3>
+            <p class="text-xs text-gray-300 leading-relaxed">
+              Ознакомьтесь с официальным сводом правил по лутингу, распределению ключей, радиомолчанию и спасению снаряжения соратников.
+            </p>
+            <button onclick="navigateTo('rules')" class="w-full mt-2 py-2.5 px-4 rounded-lg bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 font-tactical font-bold text-xs uppercase transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-file-shield"></i>
+              <span>Открыть полный регламент</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 2: RULES -->
+    <div id="tab-rules" class="space-y-8 hidden">
+      <div class="relative rounded-2xl overflow-hidden border border-red-900/50 bg-gradient-to-r from-tactical-card via-[#1c1218] to-tactical-black p-6 sm:p-8 shadow-2xl">
+        <div class="absolute inset-0 hud-scanline opacity-30"></div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="space-y-2">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-955/60 border border-red-700/60 text-red-400 text-xs font-tactical tracking-widest uppercase">
+              <i class="fa-solid fa-shield-halved text-red-500"></i>
+              <span>УСТАВ ПОДРАЗДЕЛЕНИЯ // [.50] COMMUNITY</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black font-tactical text-white tracking-wide">
+              Регламент вступления, иерархии и дисциплины в клане [.50]
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-300 max-w-3xl leading-relaxed">
+              Настоящий документ определяет ключевые стандарты участия, порядок приема новых игроков, регламент присвоения статусов и ролей, а также систему дисциплинарной ответственности сообщества.
+            </p>
+          </div>
+
+          <div class="shrink-0 flex flex-col sm:flex-row md:flex-col gap-3">
+            <a href="https://docs.google.com/document/d/10v0RyORsDv_gj46e39FBrjtFGv9x2IFV1Mjy46lTmKs/edit?tab=t.0" target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-tactical text-xs font-bold uppercase transition glow-red flex items-center justify-center space-x-2.5 shadow-lg">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Открыть в Google Документах</span>
+            </a>
+            <div class="text-[11px] font-mono text-gray-400 text-center">Статус: ОФИЦИАЛЬНЫЙ ДОКУМЕНТ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule Blocks -->
+      <div class="space-y-8">
+        <div class="bg-tactical-card border border-red-900/40 rounded-2xl p-6 sm:p-8 space-y-6">
+          <div class="flex items-center space-x-3 pb-3 border-b border-white/10">
+            <span class="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-tactical font-bold text-sm">1</span>
+            <h2 class="text-xl sm:text-2xl font-bold font-tactical text-white uppercase tracking-wide">
+              1. Порядок вступления в клан (Роли «.50» и «100м»)
+            </h2>
+          </div>
+          <div class="space-y-4 text-sm text-gray-300 leading-relaxed">
+            <p class="font-medium text-white">Для получения базовых ролей кандидат должен соответствовать базовым критериям:</p>
+            <ul class="space-y-2.5 pl-1">
+              <li class="flex items-start space-x-2.5"><i class="fa-solid fa-caret-right text-red-500 mt-1 shrink-0"></i><div><strong class="text-white">Присутствие:</strong> активное нахождение в сообществе минимум несколько дней.</div></li>
+              <li class="flex items-start space-x-2.5"><i class="fa-solid fa-caret-right text-red-500 mt-1 shrink-0"></i><div><strong class="text-white">Игровой навык:</strong> стабильный уровень игры и ориентация в игровой обстановке.</div></li>
+              <li class="flex items-start space-x-2.5"><i class="fa-solid fa-caret-right text-red-500 mt-1 shrink-0"></i><div><strong class="text-white">Соответствие ценностям:</strong> уважение к участникам клана, адекватность, отсутствие токсичности.</div></li>
+              <li class="flex items-start space-x-2.5"><i class="fa-solid fa-caret-right text-red-500 mt-1 shrink-0"></i><div><strong class="text-white">Стиль геймплея:</strong> активные перемещения. Категорически исключен регулярный «крысиный» стиль.</div></li>
+              <li class="flex items-start space-x-2.5"><i class="fa-solid fa-caret-right text-red-500 mt-1 shrink-0"></i><div><strong class="text-white">Поручительство:</strong> рекомендации минимум от 2-х участников с ролью «1000м».</div></li>
+              <li class="flex items-start space-x-2.5"><i class="fa-solid fa-caret-right text-red-500 mt-1 shrink-0"></i><div><strong class="text-white">Личная инициатива:</strong> кандидат обязан самостоятельно заявить о своем желании получить роль «.50».</div></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-tactical-card border border-red-900/40 rounded-2xl p-6 sm:p-8 space-y-6">
+          <div class="flex items-center space-x-3 pb-3 border-b border-white/10">
+            <span class="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-tactical font-bold text-sm">2</span>
+            <h2 class="text-xl sm:text-2xl font-bold font-tactical text-white uppercase tracking-wide">
+              2. Иерархия ролей и система повышения
+            </h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm">
+              <thead class="bg-black/60 text-gray-300 font-tactical uppercase border-b border-red-900/50">
+                <tr>
+                  <th class="p-3.5 w-1/5">Роль</th>
+                  <th class="p-3.5 w-2/5">Критерии и статус</th>
+                  <th class="p-3.5 w-2/5">Процедура присвоения</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5 font-sans">
+                <tr class="hover:bg-white/5 transition">
+                  <td class="p-3.5 font-bold font-tactical text-white"><span class="px-2 py-0.5 rounded bg-black/60 border border-white/10 text-gray-200">«100м» + «.50»</span></td>
+                  <td class="p-3.5 text-gray-300">Базовый статус участника сообщества.</td>
+                  <td class="p-3.5 text-gray-300">Рекомендация двух игроков «1000м», согласование 24 часа. Личная инициатива.</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition">
+                  <td class="p-3.5 font-bold font-tactical text-white"><span class="px-2 py-0.5 rounded bg-blue-950/60 border border-blue-600/50 text-blue-300">«500м»</span></td>
+                  <td class="p-3.5 text-gray-300">Уровень навыка «выше среднего», полное следование правилам комьюнити.</td>
+                  <td class="p-3.5 text-gray-300">Выдается любым участником от «1000м» на свое усмотрение при личной инициативе кандидата.</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition">
+                  <td class="p-3.5 font-bold font-tactical text-white"><span class="px-2 py-0.5 rounded bg-red-955/60 border border-red-600/60 text-red-300">«1000м»</span></td>
+                  <td class="p-3.5 text-gray-300">Высокий скилл, авторитет и доверие. Частичный административный функционал.</td>
+                  <td class="p-3.5 text-gray-300">Единогласное согласие всех действующих «1000м» через голосование.</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition">
+                  <td class="p-3.5 font-bold font-tactical text-white"><span class="px-2 py-0.5 rounded bg-amber-950/80 border border-amber-500/70 text-amber-300">«STAFF»</span></td>
+                  <td class="p-3.5 text-gray-300">Высший руководящий статус, вершина развития участника клана.</td>
+                  <td class="p-3.5 text-gray-300">Присваивается исключительно на личное усмотрение Создателя (OWN).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="bg-tactical-card border border-red-900/40 rounded-2xl p-6 sm:p-8 space-y-6">
+          <div class="flex items-center space-x-3 pb-3 border-b border-white/10">
+            <span class="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-tactical font-bold text-sm">3</span>
+            <h2 class="text-xl sm:text-2xl font-bold font-tactical text-white uppercase tracking-wide">
+              3. Дисциплинарная политика и система предупреждений
+            </h2>
+          </div>
+          <div class="space-y-4 text-sm text-gray-300 leading-relaxed">
+            <p>В сообществе действует трехуровневая система дисциплинарных взысканий (варнов).</p>
+            <div class="p-4 rounded-xl bg-red-955/60 border-2 border-red-600 text-red-200 text-xs sm:text-sm font-mono shadow-lg">
+              <strong class="text-red-400 font-bold block mb-1"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Важно:</strong>
+              При получении 3-х варнов участник подлежит немедленному исключению из состава клана с аннулированием всех ролей без права на восстановление.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: MAPS -->
+    <div id="tab-maps" class="space-y-6 hidden">
+      <div class="bg-tactical-card border border-red-900/40 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2 text-xs font-mono text-red-400 uppercase tracking-widest">
+            <i class="fa-solid fa-crosshairs"></i>
+            <span>GPS ТАКТИЧЕСКИЙ СПУТНИК КАМОНЫ</span>
+          </div>
+          <h2 class="text-2xl font-black font-tactical text-white tracking-wide mt-0.5">
+            ИНТЕРАКТИВНЫЕ КАРТЫ ЛОКАЦИЙ
+          </h2>
+        </div>
+
+        <div class="flex flex-wrap gap-2 font-tactical">
+          <button onclick="selectMap('farm')" id="map-select-farm" class="map-tab-btn px-4 py-2 rounded-lg text-sm font-bold bg-red-600 text-white border border-red-500 shadow">Ферма (Farm)</button>
+          <button onclick="selectMap('valley')" id="map-select-valley" class="map-tab-btn px-4 py-2 rounded-lg text-sm font-bold bg-tactical-dark text-gray-300 hover:text-white border border-red-900/40">Долина (Valley)</button>
+          <button onclick="selectMap('armory')" id="map-select-armory" class="map-tab-btn px-4 py-2 rounded-lg text-sm font-bold bg-tactical-dark text-gray-300 hover:text-white border border-red-900/40">Оружейная (Armory)</button>
+          <button onclick="selectMap('northridge')" id="map-select-northridge" class="map-tab-btn px-4 py-2 rounded-lg text-sm font-bold bg-tactical-dark text-gray-300 hover:text-white border border-red-900/40">Нортридж (Northridge)</button>
+        </div>
+      </div>
+
+      <!-- Filters Strip -->
+      <div class="bg-tactical-dark border border-red-900/30 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-tactical">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-gray-400 text-xs font-mono mr-1">ФИЛЬТРЫ:</span>
+          <button onclick="toggleMapFilter('extract')" id="filter-btn-extract" class="filter-pill px-3 py-1.5 rounded-md bg-emerald-950/80 border border-emerald-500 text-emerald-300 font-semibold flex items-center space-x-1.5 transition"><i class="fa-solid fa-door-open"></i><span>Выходы</span></button>
+          <button onclick="toggleMapFilter('spawn')" id="filter-btn-spawn" class="filter-pill px-3 py-1.5 rounded-md bg-blue-950/80 border border-blue-500 text-blue-300 font-semibold flex items-center space-x-1.5 transition"><i class="fa-solid fa-location-crosshairs"></i><span>Спавны ЧВК</span></button>
+          <button onclick="toggleMapFilter('loot')" id="filter-btn-loot" class="filter-pill px-3 py-1.5 rounded-md bg-yellow-950/80 border border-yellow-500 text-yellow-300 font-semibold flex items-center space-x-1.5 transition"><i class="fa-solid fa-vault"></i><span>Сейфы & Ценный лут</span></button>
+          <button onclick="toggleMapFilter('boss')" id="filter-btn-boss" class="filter-pill px-3 py-1.5 rounded-md bg-red-955/80 border border-red-500 text-red-300 font-semibold flex items-center space-x-1.5 transition"><i class="fa-solid fa-skull"></i><span>Боссы / Охрана</span></button>
+        </div>
+
+        <div class="bg-black/60 border border-white/10 rounded-md p-0.5 flex items-center space-x-1">
+          <button onclick="zoomMap(1.2)" class="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-white rounded"><i class="fa-solid fa-plus text-xs"></i></button>
+          <button onclick="zoomMap(0.8)" class="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-white rounded"><i class="fa-solid fa-minus text-xs"></i></button>
+          <button onclick="resetMapTransform()" class="px-2 h-7 flex items-center justify-center text-gray-300 hover:text-white rounded text-[11px]">100%</button>
+        </div>
+      </div>
+
+      <!-- Map Viewport -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-8 xl:col-span-9 bg-[#08090d] border border-red-900/50 rounded-2xl overflow-hidden relative shadow-2xl h-[560px] sm:h-[650px] flex flex-col">
+          <div class="absolute top-3 left-3 z-20 pointer-events-none flex flex-col space-y-1">
+            <div class="bg-black/80 backdrop-blur border border-red-800/60 px-3 py-1 rounded text-[11px] font-mono text-red-400 flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+              <span id="map-hud-loc-name" class="font-bold text-white uppercase">КАРТА: ФЕРМА</span>
+              <span class="text-gray-500">|</span>
+              <span id="map-hud-coords">GRID: D4 (X: 520, Y: 340)</span>
+            </div>
+          </div>
+
+          <div id="map-viewport" class="w-full h-full relative overflow-hidden map-canvas-container flex-1 bg-[#0b0d13]">
+            <div id="map-world" class="absolute origin-top-left transition-transform duration-75 w-[1600px] h-[1200px]">
+              <svg id="tactical-svg-layer" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+                    <rect width="100" height="100" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
+                    <circle cx="100" cy="100" r="1.5" fill="rgba(229,9,20,0.4)" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="#0b0d13" />
+                <rect width="100%" height="100%" fill="url(#grid)" />
+                <g id="map-svg-terrain"></g>
+              </svg>
+              <div id="map-markers-layer" class="absolute inset-0 pointer-events-auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-4 xl:col-span-3 space-y-4">
+          <div id="intel-card" class="bg-tactical-card border border-red-900/40 rounded-2xl p-5 shadow-xl transition-all">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+              <div>
+                <span class="text-[10px] font-mono text-red-400 uppercase tracking-wider">РАЗВЕДДАННЫЕ ТОЧКИ</span>
+                <h3 id="intel-title" class="font-tactical font-bold text-white text-base">Кликните на маркер</h3>
+              </div>
+            </div>
+            <div class="mt-4 space-y-3 text-xs">
+              <div id="intel-description" class="text-gray-300 leading-relaxed">
+                Выберите любую метку на карте, чтобы просмотреть требования к эвакуации, нужные ключи и рекомендации.
+              </div>
+              <div id="intel-meta-block" class="hidden space-y-2 pt-2 border-t border-white/5 font-mono text-[11px]">
+                <div class="flex justify-between p-2 rounded bg-black/40"><span class="text-gray-400">Угроза:</span><span id="intel-meta-danger" class="text-red-400 font-bold">ВЫСОКИЙ</span></div>
+                <div class="flex justify-between p-2 rounded bg-black/40"><span class="text-gray-400">Ключ:</span><span id="intel-meta-key" class="text-yellow-400 font-bold">201</span></div>
+                <div class="flex justify-between p-2 rounded bg-black/40"><span class="text-gray-400">Выход:</span><span id="intel-meta-extract" class="text-emerald-400 font-bold">Всегда открыт</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: MEMBERS ROSTER -->
+    <div id="tab-members" class="space-y-6 hidden">
+      <div class="bg-tactical-card border border-red-900/40 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div>
+            <div class="flex items-center space-x-2 text-xs font-mono text-red-400 uppercase tracking-widest mb-1">
+              <i class="fa-brands fa-discord"></i>
+              <span>DISCORD SQUAD DIRECTORY // РОЛЬ: [.50]</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black font-tactical text-white tracking-wide">
+              БОЕВОЙ СОСТАВ [.50] COMMUNITY
+            </h2>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <div class="px-4 py-2 rounded-xl bg-black/60 border border-red-900/60 font-mono text-xs flex items-center space-x-3">
+              <span class="text-gray-400">В реестре:</span>
+              <span id="members-stat-total" class="text-lg font-bold text-white font-tactical">154</span>
+              <span class="text-emerald-400 text-[10px] bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/60">LIVE</span>
+            </div>
+            <button onclick="syncDiscordLiveFeed(true)" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-tactical text-xs font-bold uppercase transition glow-red">
+              <i class="fa-solid fa-arrows-rotate mr-1"></i> Синхронизировать
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="bg-tactical-dark border border-red-900/30 rounded-xl p-4 space-y-3 font-tactical">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="relative flex-1 max-w-md">
+            <input type="text" id="members-search-input" oninput="handleMemberSearch(this.value)" placeholder="Поиск бойца по позывному, роли или ID..." class="w-full bg-black/60 border border-red-900/60 rounded-lg pl-10 pr-4 py-2 text-white text-xs font-tactical focus:outline-none focus:border-red-500">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-gray-500 text-xs"></i>
+          </div>
+
+          <select id="members-sort-select" onchange="changeMembersSort(this.value)" class="bg-tactical-card border border-red-900/60 text-white text-xs font-tactical rounded px-2.5 py-1.5 focus:outline-none cursor-pointer">
+            <option value="priority" selected>★ По иерархии ролей (Приоритет)</option>
+            <option value="status">● Сначала в сети (Online / В рейде)</option>
+            <option value="alpha">🔤 По позывному (А–Я)</option>
+            <option value="recent">⏱ По недавней регистрации</option>
+          </select>
+        </div>
+
+        <div class="pt-2 border-t border-white/5 flex flex-wrap items-center gap-2 text-xs" id="members-role-filters-container"></div>
+      </div>
+
+      <div id="members-grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+      <div id="members-empty-state" class="hidden bg-tactical-card border border-red-900/40 rounded-2xl p-12 text-center space-y-3">
+        <h4 class="text-lg font-bold font-tactical text-white">Боец не обнаружен в реестре</h4>
+      </div>
+    </div>
+
+    <!-- TAB 5: MEDIA HUB -->
+    <div id="tab-media" class="space-y-8 hidden">
+      <section class="bg-tactical-dark border border-purple-900/40 rounded-xl p-3 px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
+        <div class="flex items-center space-x-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="text-gray-300">СТАТУС: <strong id="media-ribbon-status" class="text-emerald-400">ШЛЮЗ HELIX АКТИВЕН</strong></span>
+          <span class="text-gray-600 hidden md:inline">|</span>
+          <span class="text-gray-400 hidden md:inline">ОБНОВЛЕНО: <span id="media-last-sync-time" class="text-purple-300 font-bold">Только что</span></span>
+        </div>
+        <button onclick="syncTwitchLiveStreams(true)" class="px-3 py-1.5 rounded-lg bg-tactical-purple hover:bg-tactical-purpleDark text-white text-xs font-bold transition flex items-center space-x-1.5 glow-twitch">
+          <i id="media-sync-icon" class="fa-solid fa-arrows-rotate text-xs"></i>
+          <span>Обновить Twitch</span>
+        </button>
+      </section>
+
+      <section class="relative rounded-2xl overflow-hidden border border-red-900/50 bg-gradient-to-r from-tactical-card via-[#16111f] to-tactical-black p-6 sm:p-10 shadow-2xl">
+        <div class="relative z-10 max-w-3xl space-y-4">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-600/50 text-purple-300 text-xs font-tactical uppercase">
+            <span class="w-2 h-2 rounded-full bg-purple-400 live-dot-pulse"></span>
+            <span>Прямые трансляции от Media [.50]</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-black font-tactical text-white tracking-tight leading-tight">
+            Прямые трансляции сообщества в одном месте!
+          </h2>
+          <p class="text-xs sm:text-sm text-gray-300 leading-relaxed max-w-2xl">
+            Смотри прямые трансляции прямо на сайте сообщества! Быстро переходи на каналы, отслеживай статистику своих любимых авторов. А так же мы собрали здесь все их соц. сети. Вааась, это же удобно!
+          </p>
+        </div>
+      </section>
+
+      <!-- Media Grid -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold font-tactical text-white uppercase tracking-wider">Media Atoms :</h3>
+          <div class="text-xs font-mono text-gray-400">Каналов: <span id="visible-cards-count" class="text-purple-400 font-bold">4</span></div>
+        </div>
+        <div id="streamers-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </section>
+    </div>
+
+    <!-- TAB 6: ADMIN PANEL -->
+    <div id="tab-admin" class="space-y-8 hidden">
+      <div id="admin-locked-view" class="max-w-md mx-auto my-12 bg-tactical-card border-2 border-red-600/50 rounded-2xl p-8 shadow-2xl text-center">
+        <h2 class="text-2xl font-black font-tactical text-white uppercase">ДОСТУП ОГРАНИЧЕН</h2>
+        <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left mt-6">
+          <input type="password" id="admin-passcode-input" class="w-full bg-black/60 border border-red-900/80 rounded-lg px-4 py-3 text-white font-mono text-sm" placeholder="Пароль администратора..." required>
+          <button type="submit" class="w-full py-3 rounded-lg bg-red-600 hover:bg-red-500 text-white font-tactical font-bold uppercase transition glow-red">Войти</button>
+        </form>
+      </div>
+
+      <div id="admin-unlocked-view" class="space-y-8 hidden">
+        <div class="bg-tactical-card border border-red-900/50 rounded-2xl p-6 flex justify-between items-center">
+          <h2 class="text-2xl font-black font-tactical text-white">ПАНЕЛЬ УПРАВЛЕНИЯ САЙТОМ</h2>
+          <button onclick="adminLogout()" class="px-4 py-2 rounded-lg bg-red-955 text-red-300 text-xs font-tactical">Выйти</button>
+        </div>
+
+        <div class="flex border-b border-red-900/40 space-x-4 font-tactical text-sm overflow-x-auto">
+          <button onclick="switchAdminTab('general')" id="adm-tab-general-btn" class="adm-subtab-btn pb-3 px-2 border-b-2 border-red-600 text-white font-bold">Главные данные</button>
+          <button onclick="switchAdminTab('media')" id="adm-tab-media-btn" class="adm-subtab-btn pb-3 px-2 border-b-2 border-transparent text-gray-400 font-bold">Media</button>
+          <button onclick="switchAdminTab('discord')" id="adm-tab-discord-btn" class="adm-subtab-btn pb-3 px-2 border-b-2 border-transparent text-gray-400 font-bold">Discord</button>
+          <button onclick="switchAdminTab('sql')" id="adm-tab-sql-btn" class="adm-subtab-btn pb-3 px-2 border-b-2 border-transparent text-gray-400 font-bold">SQL База</button>
+        </div>
+
+        <!-- Admin Subtabs -->
+        <div id="adm-subtab-general" class="space-y-6">
+          <form onsubmit="saveGeneralSettings(event)" class="bg-tactical-card border border-red-900/30 rounded-2xl p-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input type="text" id="adm-input-clan-name" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white text-xs" placeholder="Название сообщества">
+              <input type="text" id="adm-input-clan-tag" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white text-xs" placeholder="Тег">
+              <input type="url" id="adm-input-discord-url" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white text-xs" placeholder="Discord URL">
+              <select id="adm-input-recruit-status" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white text-xs">
+                <option value="open">ОТКРЫТ</option>
+                <option value="closed">ЗАКРЫТ</option>
+              </select>
+            </div>
+            <textarea id="adm-input-slogan" rows="3" class="w-full bg-tactical-dark border border-red-900/60 rounded p-3 text-white text-xs"></textarea>
+            <button type="submit" class="px-5 py-2.5 rounded bg-red-600 hover:bg-red-500 text-white font-tactical font-bold text-xs uppercase">Сохранить</button>
+          </form>
+        </div>
+
+        <div id="adm-subtab-media" class="space-y-6 hidden">
+          <div class="bg-tactical-card border border-red-900/30 rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-white font-tactical font-bold">Media Atoms Каналы</h3>
+              <button onclick="openAddStreamerModal()" class="px-3 py-1.5 rounded bg-red-600 text-white text-xs font-bold">+ Добавить</button>
+            </div>
+            <table class="w-full text-left text-xs font-mono">
+              <tbody id="adm-streamers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adm-subtab-discord" class="space-y-6 hidden">
+          <form onsubmit="saveDiscordSettings(event)" class="bg-tactical-card border border-red-900/30 rounded-2xl p-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+              <input type="text" id="adm-discord-guild-id" placeholder="Guild ID" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white">
+              <input type="text" id="adm-discord-channel-id" placeholder="Channel ID" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white">
+              <input type="text" id="adm-discord-role-id" placeholder="Target Role ID" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white">
+              <input type="url" id="adm-discord-worker-url" placeholder="Worker URL" class="bg-tactical-dark border border-red-900/60 rounded px-3 py-2 text-white">
+            </div>
+            <button type="submit" class="px-5 py-2 rounded bg-red-600 text-white font-tactical font-bold text-xs">Сохранить Discord</button>
+          </form>
+        </div>
+
+        <div id="adm-subtab-sql" class="space-y-6 hidden">
+          <div class="bg-tactical-card border border-red-900/30 rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-white font-bold font-tactical">Таблица пользователей</h3>
+              <button onclick="openSupabaseModal()" class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-600 text-xs font-mono">Supabase Cloud</button>
+            </div>
+            <table class="w-full text-left text-xs font-mono"><tbody id="sql-users-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODALS -->
+  <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-md bg-tactical-card border-2 border-red-600/70 rounded-2xl p-6 shadow-2xl">
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div class="flex border-b border-white/10 mb-6 font-tactical text-sm">
+        <button onclick="switchAuthTab('login')" id="auth-tab-btn-login" class="flex-1 pb-3 text-center font-bold text-white border-b-2 border-red-600">Вход</button>
+        <button onclick="switchAuthTab('register')" id="auth-tab-btn-register" class="flex-1 pb-3 text-center font-bold text-gray-400 border-b-2 border-transparent">Регистрация</button>
+      </div>
+
+      <form id="form-auth-login" onsubmit="handleUserLogin(event)" class="space-y-4 text-xs font-tactical">
+        <input type="text" id="login-identifier" placeholder="Позывной или email" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white text-sm" required>
+        <input type="password" id="login-password" placeholder="Пароль" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white text-sm" required>
+        <button type="submit" class="w-full py-2.5 rounded bg-red-600 text-white font-bold uppercase tracking-wider">Войти в строй</button>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button type="button" onclick="fillDemoAccount('commander')" class="p-2 rounded bg-black/60 border border-red-900/60 text-red-400 text-xs text-left"><strong>Командир</strong></button>
+          <button type="button" onclick="fillDemoAccount('operator')" class="p-2 rounded bg-black/60 border border-red-900/60 text-red-400 text-xs text-left"><strong>Оперативник</strong></button>
+        </div>
+      </form>
+
+      <form id="form-auth-register" onsubmit="handleUserRegister(event)" class="space-y-3 text-xs font-tactical hidden">
+        <input type="text" id="reg-callsign" placeholder="Позывной бойца" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white" required>
+        <input type="email" id="reg-email" placeholder="Email" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white" required>
+        <input type="password" id="reg-password" placeholder="Пароль" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white" required>
+        <input type="password" id="reg-password-confirm" placeholder="Повтор пароля" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white" required>
+        <button type="submit" class="w-full py-2.5 rounded bg-emerald-600 text-white font-bold uppercase">Зарегистрировать жетон</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-md bg-tactical-card border-2 border-red-600/70 rounded-2xl p-6 shadow-2xl">
+      <button onclick="closeProfileModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 id="profile-modal-name" class="text-xl font-bold font-tactical text-white mb-4">COMMANDER_50</h3>
+      <div class="space-y-2 font-mono text-xs">
+        <div class="flex justify-between p-2 rounded bg-black/50"><span class="text-gray-400">Жетон:</span><span id="profile-modal-dogtag" class="text-red-400 font-bold">#ABI-50</span></div>
+        <div class="flex justify-between p-2 rounded bg-black/50"><span class="text-gray-400">Email:</span><span id="profile-modal-email" class="text-gray-300">...</span></div>
+        <div class="flex justify-between p-2 rounded bg-black/50"><span class="text-gray-400">Роль:</span><span id="profile-modal-role" class="text-yellow-400 font-bold">Оперативник</span></div>
+      </div>
+      <button onclick="logoutCurrentUser()" class="w-full mt-4 py-2 rounded bg-red-955 border border-red-700 text-red-300 font-bold text-xs uppercase">Сдать жетон (Выйти)</button>
+    </div>
+  </div>
+
+  <!-- Streamer Modal -->
+  <div id="streamer-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-lg bg-tactical-card border-2 border-red-600/60 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <button onclick="closeStreamerModal()" class="absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 id="modal-heading-text" class="text-lg font-bold font-tactical text-white uppercase mb-4">Стример [.50]</h3>
+      <form onsubmit="handleSaveStreamer(event)" class="space-y-3 text-xs font-tactical">
+        <input type="hidden" id="modal-streamer-id">
+        <input type="text" id="modal-twitch-username" placeholder="Twitch логин (shroud)" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white font-mono" required>
+        <input type="text" id="modal-display-name" placeholder="Позывной в отряде" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white" required>
+        <input type="url" id="modal-telegram-url" placeholder="https://t.me/..." class="w-full bg-black/70 border border-sky-800/60 rounded px-3 py-2 text-white font-mono">
+        <input type="url" id="modal-youtube-url" placeholder="https://youtube.com/@..." class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white font-mono">
+        <input type="text" id="modal-followers-count" placeholder="Фолловеры (14.8K)" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white font-mono" required>
+        <select id="modal-live-status" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white">
+          <option value="live">● В ЭФИРЕ (LIVE)</option>
+          <option value="offline">○ ОФЛАЙН</option>
+        </select>
+        <input type="text" id="modal-stream-title" placeholder="Заголовок трансляции" class="w-full bg-black/70 border border-red-900/60 rounded px-3 py-2 text-white">
+        <button type="submit" class="w-full py-2.5 rounded bg-red-600 text-white font-bold uppercase">Сохранить канал</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Twitch Player Modal -->
+  <div id="twitch-player-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-5xl bg-tactical-card border-2 border-purple-600/70 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <div class="p-3 bg-tactical-dark border-b border-white/10 flex justify-between items-center">
+        <h3 id="player-modal-title" class="text-sm font-bold text-white truncate max-w-md font-tactical">Twitch Player</h3>
+        <button onclick="closeLivePlayerModal()" class="text-gray-400 hover:text-white px-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="aspect-video w-full bg-black">
+        <iframe id="twitch-embedded-iframe" class="w-full h-full border-0" allowfullscreen="true" scrolling="no"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Cloud Modal -->
+  <div id="supabase-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-lg bg-tactical-card border-2 border-emerald-600/70 rounded-2xl p-6 shadow-2xl">
+      <button onclick="closeSupabaseModal()" class="absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 class="text-lg font-bold font-tactical text-white uppercase mb-3">Supabase Cloud PostgreSQL</h3>
+      <form onsubmit="handleSaveSupabaseConfig(event)" class="space-y-3 font-mono text-xs">
+        <input type="url" id="sb-input-url" placeholder="Project URL" class="w-full bg-black/70 border border-emerald-800 rounded px-3 py-2 text-white">
+        <input type="text" id="sb-input-key" placeholder="Anon Public Key" class="w-full bg-black/70 border border-emerald-800 rounded px-3 py-2 text-white">
+        <button type="submit" class="w-full py-2.5 rounded bg-emerald-600 text-white font-bold uppercase">Подключить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-16 bg-[#060709] border-t border-red-955/60 py-8 px-4 sm:px-6 lg:px-8 font-tactical text-xs text-gray-400">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <a href="#admin" title="Доступ для командования [.50]" class="text-red-600 hover:text-red-400"><i class="fa-solid fa-shield-halved text-lg"></i></a>
+        <span>[.50] COMMUNITY // Игровое сообщество Arena Breakout: Infinite</span>
+      </div>
+      <div class="text-center sm:text-right font-mono text-[11px] text-gray-400">
+        [.50] Media HUB. Created by Stelferovskiy. Сайт не имеет отношения к компании-разработчику игры.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Подключение основного скрипта логики -->
+  <script src="app.js"></script>
+</body>
+</html>
