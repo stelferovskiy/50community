@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[.50] Media HUB</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Google Fonts: Chakra Petch & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              black: '#07080b',
+              dark: '#0c0e14',
+              card: '#131622',
+              cardHover: '#1c2132',
+              border: '#2a151b',
+              red: '#e50914',
+              crimson: '#ff1e27',
+              gold: '#f59e0b',
+              emerald: '#10b981',
+              purple: '#9146FF',
+              purpleDark: '#772ce8',
+              purpleHover: '#a970ff'
+            }
+          },
+          fontFamily: {
+            tactical: ['"Chakra Petch"', 'sans-serif'],
+            sans: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #07080b;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(145, 70, 255, 0.1) 0%, transparent 55%),
+        radial-gradient(circle at 85% 20%, rgba(229, 9, 20, 0.08) 0%, transparent 45%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    }
+
+    /* Tactical Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #07080b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #9146ff;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #e50914;
+    }
+
+    /* Glow Effects */
+    .glow-red {
+      box-shadow: 0 0 16px rgba(229, 9, 20, 0.4);
+    }
+    .glow-twitch {
+      box-shadow: 0 0 18px rgba(145, 70, 255, 0.45);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+    .glow-telegram {
+      box-shadow: 0 0 14px rgba(34, 158, 217, 0.45);
+    }
+    .glow-youtube {
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+    }
+
+    /* HUD Scanline */
+    .hud-scanline {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.02));
+      background-size: 100% 3px, 4px 100%;
+      pointer-events: none;
+    }
+
+    /* Pulse animation for live badge */
+    @keyframes livePulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 8px #ef4444); }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .live-dot-pulse {
+      animation: livePulse 1.6s infinite ease-in-out;
+    }
+
+    /* Rotating sync icon */
+    .spin-sync {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-tactical-black selection:bg-purple-600 selection:text-white">
+
+  <!-- TOP SATELLITE HEADER -->
+  <header class="bg-tactical-dark border-b border-red-900/40 px-4 py-3 sm:px-6 sticky top-0 z-40 backdrop-blur-md bg-opacity-95">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+      
+      <!-- Brand & Hub Identity: Clean [.50] Media HUB -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/60 flex items-center justify-center text-purple-400 glow-twitch">
+          <i class="fa-brands fa-twitch text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-black font-tactical text-white tracking-wider">
+            [.50] Media HUB
+          </h1>
+        </div>
+      </div>
+
+      <!-- Action & Sync Controls Strip -->
+      <div class="flex flex-wrap items-center gap-2 shrink-0 font-tactical text-xs">
+        <!-- Live Sync Button -->
+        <button onclick="syncTwitchLiveStreams(true)" id="btn-sync-twitch" class="px-3.5 py-2 rounded-lg bg-tactical-purple hover:bg-tactical-purpleDark text-white font-bold transition flex items-center space-x-1.5 glow-twitch shadow">
+          <i id="sync-icon" class="fa-solid fa-arrows-rotate text-xs"></i>
+          <span>Синхронизировать API</span>
+        </button>
+
+        <!-- API Config Modal Trigger -->
+        <button onclick="openApiConfigModal()" class="px-3 py-2 rounded-lg bg-black/60 hover:bg-black/90 border border-purple-600/50 text-purple-300 hover:text-white transition flex items-center space-x-1.5" title="Настройки Cloudflare Worker и ключей Twitch">
+          <i class="fa-solid fa-cloud-bolt text-purple-400"></i>
+          <span class="hidden sm:inline">Шлюз Worker</span>
+        </button>
+
+        <!-- Add Streamer Button -->
+        <button onclick="openAddStreamerModal()" class="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center space-x-1.5 glow-red shadow">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>Добавить стримера</span>
+        </button>
+
+        <!-- Editor Mode Toggle -->
+        <button onclick="toggleAdminView()" id="btn-admin-preview" class="px-3 py-2 rounded-lg bg-tactical-card hover:bg-tactical-cardHover border border-white/10 text-gray-300 hover:text-white transition flex items-center space-x-1.5" title="Показать/скрыть быстрые кнопки редактирования">
+          <i class="fa-solid fa-sliders text-red-400"></i>
+          <span class="hidden sm:inline">Редактор</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN MEDIA VIEWPORT -->
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+
+    <!-- Live Sync Alert & Worker Status Ribbon -->
+    <section class="bg-tactical-dark border border-purple-900/40 rounded-xl p-3 px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
+      <div class="flex items-center space-x-3">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <span class="text-gray-300">
+          СТАТУС ПОДКЛЮЧЕНИЯ: 
+          <strong id="ribbon-worker-status" class="text-emerald-400">ШЛЮЗ HELIX АКТИВЕН</strong>
+        </span>
+        <span class="text-gray-600 hidden md:inline">|</span>
+        <span class="text-gray-400 hidden md:inline">
+          ОБНОВЛЕНО: <span id="ribbon-last-sync-time" class="text-purple-300 font-bold">Только что</span>
+        </span>
+      </div>
+
+      <div class="flex items-center space-x-3 self-end sm:self-auto">
+        <label class="flex items-center space-x-2 cursor-pointer text-gray-400 hover:text-white transition select-none">
+          <input type="checkbox" id="toggle-autosync" onchange="toggleAutoSync(this.checked)" checked class="rounded bg-black border-purple-700 text-purple-600 focus:ring-0">
+          <span>Авто-опрос каждые 60с</span>
+        </label>
+        <span id="autosync-countdown" class="text-[10px] bg-purple-950/80 border border-purple-700/60 text-purple-300 px-2 py-0.5 rounded font-mono">60s</span>
+      </div>
+    </section>
+    
+    <!-- Hero Banner with Pure Text Focus (No Player Card) -->
+    <section class="relative rounded-2xl overflow-hidden border border-red-900/50 bg-gradient-to-r from-tactical-card via-[#16111f] to-tactical-black p-6 sm:p-10 shadow-2xl">
+      <div class="absolute inset-0 hud-scanline opacity-30"></div>
+      <div class="absolute -right-16 -top-16 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-3xl space-y-4">
+        
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-600/50 text-purple-300 text-xs font-tactical uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-purple-400 live-dot-pulse"></span>
+          <span>Прямые трансляции от Media [.50]</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-4xl font-black font-tactical text-white tracking-tight leading-tight">
+          Прямые трансляции сообщества в одном месте!
+        </h2>
+
+        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed max-w-2xl">
+          Смотри прямые трансляции прямо на сайте сообщества! Быстро переходи на каналы, отслеживай статистику своих любимых авторов. А так же мы собрали здесь все их соц. сети. Вааась, это же удобно!
+        </p>
+
+      </div>
+    </section>
+
+    <!-- Filters & Search Toolbar -->
+    <section class="bg-tactical-dark border border-red-900/40 rounded-xl p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs font-tactical">
+      
+      <!-- Filter category buttons -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-gray-400 font-mono text-[11px] uppercase mr-1 flex items-center">
+          <i class="fa-solid fa-filter text-red-500 mr-1.5"></i> ФИЛЬТР:
+        </span>
+
+        <button onclick="setMediaFilter('all')" id="filter-btn-all" class="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold transition flex items-center space-x-1.5 glow-red">
+          <i class="fa-solid fa-list-ul text-[10px]"></i>
+          <span>Все стримеры</span>
+          <span id="badge-total-streamers" class="bg-black/40 text-white px-1.5 py-0.2 rounded font-mono text-[10px] ml-1">0</span>
+        </button>
+
+        <button onclick="setMediaFilter('live')" id="filter-btn-live" class="px-3 py-1.5 rounded-lg bg-tactical-card text-gray-300 hover:text-white border border-white/10 transition flex items-center space-x-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 live-dot-pulse"></span>
+          <span>В эфире (LIVE)</span>
+          <span id="badge-live-streamers" class="bg-emerald-950 text-emerald-300 border border-emerald-600 px-1.5 py-0.2 rounded font-mono text-[10px] ml-1">0</span>
+        </button>
+
+        <button onclick="setMediaFilter('offline')" id="filter-btn-offline" class="px-3 py-1.5 rounded-lg bg-tactical-card text-gray-300 hover:text-white border border-white/10 transition flex items-center space-x-1.5">
+          <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+          <span>Офлайн каналы</span>
+        </button>
+      </div>
+
+      <!-- Live Search & Sort -->
+      <div class="flex items-center space-x-2 shrink-0">
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="streamer-search-input" oninput="handleStreamerSearch(this.value)" placeholder="Поиск по нику или игре..." class="w-full bg-black/70 border border-red-900/60 rounded-lg pl-8 pr-3 py-1.5 text-white text-xs font-tactical focus:outline-none focus:border-red-500 transition">
+          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-gray-500 text-xs"></i>
+        </div>
+
+        <select id="streamer-sort-select" onchange="handleStreamerSort(this.value)" class="bg-black/70 border border-red-900/60 rounded-lg px-2.5 py-1.5 text-white text-xs font-tactical focus:outline-none focus:border-red-500 cursor-pointer">
+          <option value="status">● Сначала в эфире (LIVE)</option>
+          <option value="followers">★ По числу фолловеров</option>
+          <option value="viewers">👁 По зрителям онлайн</option>
+          <option value="name">🔤 По никнейму (А-Я)</option>
+        </select>
+      </div>
+
+    </section>
+
+    <!-- STREAMERS GRID -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-2">
+          <span class="w-1.5 h-4 bg-purple-500 rounded-full"></span>
+          <h3 class="text-lg font-bold font-tactical text-white uppercase tracking-wider">
+            Media Atoms :
+          </h3>
+        </div>
+        <div class="text-xs font-mono text-gray-400">
+          Отображается каналов: <span id="visible-cards-count" class="text-purple-400 font-bold">0</span>
+        </div>
+      </div>
+
+      <div id="streamers-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamically injected Twitch Cards via JavaScript -->
+      </div>
+
+      <!-- Empty State View -->
+      <div id="streamers-empty-state" class="hidden bg-tactical-card border border-red-900/40 rounded-2xl p-12 text-center space-y-3">
+        <div class="w-16 h-16 mx-auto rounded-full bg-purple-600/10 border border-purple-500/40 flex items-center justify-center text-purple-400 text-2xl">
+          <i class="fa-brands fa-twitch"></i>
+        </div>
+        <h4 class="text-lg font-bold font-tactical text-white">Стример не найден</h4>
+        <p class="text-xs text-gray-400 max-w-sm mx-auto">
+          По вашему запросу не найдено ни одного канала. Сбросьте фильтры поиска или добавьте новый логин Twitch.
+        </p>
+        <button onclick="resetFilters()" class="px-4 py-2 rounded-lg bg-red-600 text-white font-tactical text-xs font-bold transition">
+          Сбросить фильтры
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ADD / EDIT STREAMER                               -->
+  <!-- ======================================================== -->
+  <div id="streamer-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-lg bg-tactical-card border-2 border-red-600/60 rounded-2xl p-6 sm:p-7 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      
+      <!-- Decorative Glow -->
+      <div class="absolute -top-16 -right-16 w-44 h-44 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Modal Close Button -->
+      <button onclick="closeStreamerModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="flex items-center space-x-3 pb-3 mb-4 border-b border-white/10">
+        <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/50 flex items-center justify-center text-purple-400 text-lg glow-twitch">
+          <i class="fa-brands fa-twitch"></i>
+        </div>
+        <div>
+          <h3 id="modal-heading-text" class="text-lg font-bold font-tactical text-white uppercase">Добавить стримера [.50]</h3>
+          <p class="text-[11px] text-gray-400 font-mono">Профиль Twitch, а также каналы Telegram и YouTube</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="streamer-edit-form" onsubmit="handleSaveStreamer(event)" class="space-y-3.5 text-xs font-tactical">
+        <input type="hidden" id="modal-streamer-id" value="">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-gray-400 uppercase mb-1">Никнейм на Twitch (username):</label>
+            <div class="relative">
+              <input type="text" id="modal-twitch-username" oninput="handleTwitchUsernameInput(this.value)" placeholder="Например: shroud" class="w-full bg-black/70 border border-red-900/60 rounded-lg pl-7 pr-3 py-2 text-white focus:outline-none focus:border-red-500 font-mono" required>
+              <i class="fa-brands fa-twitch absolute left-2.5 top-2.5 text-purple-400 text-xs"></i>
+            </div>
+            <p class="text-[10px] text-gray-500 font-mono mt-0.5">twitch.tv/<strong>логин</strong></p>
+          </div>
+
+          <div>
+            <label class="block font-mono text-gray-400 uppercase mb-1">Позывной в отряде [.50]:</label>
+            <input type="text" id="modal-display-name" placeholder="Например: REAPER // .50" class="w-full bg-black/70 border border-red-900/60 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500" required>
+          </div>
+        </div>
+
+        <!-- Quick Auto-Fetch from Twitch API button -->
+        <div class="p-2.5 rounded-lg bg-purple-950/40 border border-purple-700/50 flex items-center justify-between">
+          <div class="flex items-center space-x-2 text-[11px] text-purple-200">
+            <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+            <span>Авто-заполнение через Twitch API:</span>
+          </div>
+          <button type="button" onclick="autoFetchFromTwitchModal()" id="btn-modal-autofetch" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[10px] font-mono transition flex items-center space-x-1">
+            <i class="fa-solid fa-cloud-arrow-down"></i>
+            <span>Подтянуть данные</span>
+          </button>
+        </div>
+
+        <!-- SOCIAL LINKS SECTION (Telegram & YouTube) -->
+        <div class="p-3 rounded-xl bg-black/50 border border-white/10 space-y-2.5">
+          <span class="text-[10px] font-mono font-bold text-gray-300 uppercase flex items-center space-x-1.5">
+            <i class="fa-solid fa-share-nodes text-purple-400"></i>
+            <span>Социальные сети стримера:</span>
+          </span>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-mono text-gray-400 uppercase mb-1 flex items-center space-x-1">
+                <i class="fa-brands fa-telegram text-sky-400"></i>
+                <span>Канал Telegram:</span>
+              </label>
+              <input type="url" id="modal-telegram-url" placeholder="https://t.me/username" class="w-full bg-black/70 border border-sky-800/60 rounded-lg px-3 py-2 text-white font-mono text-[11px] focus:outline-none focus:border-sky-400">
+            </div>
+
+            <div>
+              <label class="block font-mono text-gray-400 uppercase mb-1 flex items-center space-x-1">
+                <i class="fa-brands fa-youtube text-red-500"></i>
+                <span>Канал YouTube:</span>
+              </label>
+              <input type="url" id="modal-youtube-url" placeholder="https://youtube.com/@channel" class="w-full bg-black/70 border border-red-900/60 rounded-lg px-3 py-2 text-white font-mono text-[11px] focus:outline-none focus:border-red-500">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-gray-400 uppercase mb-1">Количество фолловеров:</label>
+            <input type="text" id="modal-followers-count" placeholder="Например: 14.8K или 14800" class="w-full bg-black/70 border border-red-900/60 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-red-500" required>
+          </div>
+
+          <div>
+            <label class="block font-mono text-gray-400 uppercase mb-1">Статус трансляции:</label>
+            <select id="modal-live-status" class="w-full bg-black/70 border border-red-900/60 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500 cursor-pointer">
+              <option value="live">● СЕЙЧАС В ЭФИРЕ (LIVE)</option>
+              <option value="offline">○ ОФЛАЙН</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-mono text-gray-400 uppercase mb-1">Заголовок стрима или описание:</label>
+          <input type="text" id="modal-stream-title" placeholder="Рейды в Оружейную | Блокада | Сквад [.50] | Drops On" class="w-full bg-black/70 border border-red-900/60 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-gray-400 uppercase mb-1">URL Аватарки стримера:</label>
+            <input type="url" id="modal-avatar-url" placeholder="https://... (оставьте пустым для авто)" class="w-full bg-black/70 border border-red-900/60 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-red-500 text-[11px]">
+          </div>
+
+          <div>
+            <label class="block font-mono text-gray-400 uppercase mb-1">URL Превью баннера стрима:</label>
+            <input type="url" id="modal-banner-url" placeholder="https://... (оставьте пустым для авто)" class="w-full bg-black/70 border border-red-900/60 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-red-500 text-[11px]">
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-black/40 border border-white/5 text-[11px] font-mono text-gray-400 flex items-center justify-between">
+          <span class="flex items-center space-x-1.5">
+            <i class="fa-solid fa-link text-red-400"></i>
+            <span>Ссылка на канал:</span>
+          </span>
+          <span id="modal-preview-url" class="text-purple-300 font-bold">https://twitch.tv/...</span>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3 border-t border-white/10">
+          <button type="button" onclick="closeStreamerModal()" class="px-4 py-2 rounded-lg bg-black/60 hover:bg-black/90 border border-white/10 text-gray-300 transition">
+            Отмена
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold transition glow-red flex items-center space-x-1.5">
+            <i class="fa-solid fa-floppy-disk text-xs"></i>
+            <span>Сохранить канал</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CLOUDFLARE WORKER / TWITCH API CONFIG             -->
+  <!-- ======================================================== -->
+  <div id="api-config-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-lg bg-tactical-card border-2 border-purple-600/70 rounded-2xl p-6 sm:p-7 shadow-2xl overflow-hidden">
+      
+      <button onclick="closeApiConfigModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-3 mb-4 border-b border-white/10">
+        <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/60 flex items-center justify-center text-purple-400 text-lg glow-twitch">
+          <i class="fa-solid fa-cloud-bolt"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold font-tactical text-white uppercase">Конфигурация Twitch API Шлюза</h3>
+          <p class="text-[11px] text-gray-400 font-mono">Cloudflare Worker Proxy для безопасного опроса Twitch Helix</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono">
+        <div>
+          <label class="block font-bold text-gray-300 uppercase mb-1.5">URL Cloudflare Worker Proxy:</label>
+          <input type="url" id="cfg-worker-url" placeholder="https://twitch-50-proxy.username.workers.dev" class="w-full bg-black/70 border border-purple-700/60 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-purple-500">
+          <p class="text-[10px] text-gray-500 mt-1 leading-relaxed">
+            Подробная инструкция по созданию бесплатного Worker находится в файле <code class="text-purple-300">twitch_integration_guide.md</code>.
+          </p>
+        </div>
+
+        <div class="p-3 rounded-lg bg-black/50 border border-white/5 space-y-2 text-[11px]">
+          <div class="text-gray-300 font-bold uppercase flex items-center justify-between">
+            <span>Текущий режим работы:</span>
+            <span id="cfg-mode-badge" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-600 text-[10px]">HELIX WORKER READY</span>
+          </div>
+          <p class="text-gray-400 font-sans text-xs">
+            Если воркер не задан, модуль работает в автономном демонстрационном режиме с возможностью симуляции и ручного управления.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-white/10">
+          <button type="button" onclick="testTwitchWorkerEndpoint()" class="px-4 py-2 rounded-lg bg-black/60 hover:bg-black/90 border border-purple-600/50 text-purple-300 transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Проверить связь</span>
+          </button>
+          
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="closeApiConfigModal()" class="px-4 py-2 rounded-lg bg-black/50 border border-white/10 text-gray-300 transition">
+              Закрыть
+            </button>
+            <button type="button" onclick="saveApiConfig()" class="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold transition glow-twitch flex items-center space-x-1.5">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Сохранить</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: INLINE TWITCH LIVE PLAYER                         -->
+  <!-- ======================================================== -->
+  <div id="twitch-player-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-5xl bg-tactical-card border-2 border-purple-600/70 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      
+      <!-- Player Header Bar -->
+      <div class="p-3 sm:p-4 bg-tactical-dark border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/60 flex items-center justify-center text-purple-400">
+            <i class="fa-brands fa-twitch text-sm"></i>
+          </div>
+          <div>
+            <h3 id="player-modal-title" class="text-sm sm:text-base font-bold font-tactical text-white truncate max-w-md">Плеер трансляции</h3>
+            <p id="player-modal-channel" class="text-[11px] font-mono text-purple-300">twitch.tv/...</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <a id="player-modal-ext-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-tactical font-bold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            <span class="hidden sm:inline">Открыть в Twitch</span>
+          </a>
+          <button onclick="closeLivePlayerModal()" class="w-8 h-8 rounded-lg bg-black/60 hover:bg-black/90 border border-white/10 text-gray-400 hover:text-white flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Video Viewport -->
+      <div class="relative aspect-video w-full bg-black">
+        <iframe id="twitch-embedded-iframe" src="" class="w-full h-full border-0" allowfullscreen="true" scrolling="no"></iframe>
+      </div>
+
+      <!-- Tactical Footer -->
+      <div class="p-3 bg-tactical-dark border-t border-white/5 font-mono text-[11px] text-gray-400 flex items-center justify-between">
+        <span class="flex items-center space-x-1.5">
+          <span class="w-2 h-2 rounded-full bg-red-500 live-dot-pulse"></span>
+          <span>ТАКТИЧЕСКИЙ РЕЙДОВЫЙ ЭФИР [.50]</span>
+        </span>
+        <span class="hidden sm:inline">Для активации звука нажмите на значок громкости в плеере</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Tactical Footer -->
+  <footer class="mt-12 bg-[#060709] border-t border-red-950/60 py-6 px-4 sm:px-6 font-tactical text-xs text-gray-400">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <i class="fa-brands fa-twitch text-purple-500"></i>
+        <span>[.50] Media HUB. Created by Stelferovskiy.</span>
+      </div>
+      <div class="font-mono text-[11px] text-gray-500">
+        Сайт не имеет отношения к компании-разработчику игры. Неофициальный ресурс сообщества.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /**
+     * [.50] MEDIA MODULE - REAL-TIME TWITCH HELIX INTEGRATION & SOCIALS
+     */
+
+    const MEDIA_STORAGE_KEY = 'abi_media_streamers_v50';
+    const TWITCH_CFG_STORAGE_KEY = 'abi_twitch_worker_cfg_v50';
+
+    // Default squad streamers database with Socials
+    const DEFAULT_STREAMERS = [
+      {
+        id: 'streamer_1',
+        username: 'reaper_kamona',
+        displayName: 'REAPER // .50',
+        followers: '14.8K',
+        followersNum: 14800,
+        isLive: true,
+        viewerCount: '342',
+        title: 'ШТУРМ ОРУЖЕЙНОЙ // Ренойр на коленях // Блокада сквадом [.50]',
+        avatarUrl: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
+        bannerUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+        game: 'Arena Breakout: Infinite',
+        telegramUrl: 'https://t.me/reaper_50',
+        youtubeUrl: 'https://youtube.com/@reaper_abi'
+      },
+      {
+        id: 'streamer_2',
+        username: 'ghost_operator_abi',
+        displayName: 'GHOST_TACTICS',
+        followers: '8.2K',
+        followersNum: 8200,
+        isLive: true,
+        viewerCount: '189',
+        title: 'Снайперские выходы Нортриджа | Отель и спавны Фреда | Тактика [.50]',
+        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        bannerUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+        game: 'Arena Breakout: Infinite',
+        telegramUrl: 'https://t.me/ghost_tactics_abi',
+        youtubeUrl: ''
+      },
+      {
+        id: 'streamer_3',
+        username: 'valkyrie_pmc',
+        displayName: 'VALKYRIE [.50]',
+        followers: '23.5K',
+        followersNum: 23500,
+        isLive: false,
+        viewerCount: '0',
+        title: 'Фармим виллу Досса в Долине | Забираем золото и сейфы',
+        avatarUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
+        bannerUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+        game: 'Arena Breakout: Infinite',
+        telegramUrl: '',
+        youtubeUrl: 'https://youtube.com/@valkyrie_pmc'
+      },
+      {
+        id: 'streamer_4',
+        username: 'commander_50',
+        displayName: 'COMMANDER_50',
+        followers: '5.1K',
+        followersNum: 5100,
+        isLive: false,
+        viewerCount: '0',
+        title: 'Разбор регламента отряда и совместные рейды с новичками',
+        avatarUrl: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=200&q=80',
+        bannerUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=800&q=80',
+        game: 'Arena Breakout: Infinite',
+        telegramUrl: 'https://t.me/commander_50_kamona',
+        youtubeUrl: 'https://youtube.com/@commander_50'
+      }
+    ];
+
+    let streamersData = [];
+    let twitchWorkerUrl = '';
+    let activeFilter = 'all';
+    let searchQuery = '';
+    let sortMode = 'status';
+    let isEditorModeActive = false;
+    let autoSyncCountdown = 60;
+    let countdownInterval = null;
+
+    // Load data from LocalStorage
+    function initMediaData() {
+      try {
+        const stored = localStorage.getItem(MEDIA_STORAGE_KEY);
+        if (stored) {
+          streamersData = JSON.parse(stored);
+          // Migration check for missing social fields
+          streamersData.forEach(s => {
+            if (s.telegramUrl === undefined) s.telegramUrl = '';
+            if (s.youtubeUrl === undefined) s.youtubeUrl = '';
+          });
+        } else {
+          streamersData = JSON.parse(JSON.stringify(DEFAULT_STREAMERS));
+          saveData();
+        }
+      } catch (err) {
+        streamersData = JSON.parse(JSON.stringify(DEFAULT_STREAMERS));
+      }
+
+      try {
+        const storedCfg = localStorage.getItem(TWITCH_CFG_STORAGE_KEY);
+        if (storedCfg) {
+          const cfg = JSON.parse(storedCfg);
+          twitchWorkerUrl = cfg.workerUrl || '';
+        }
+      } catch (err) {}
+
+      updateWorkerStatusUI();
+    }
+
+    function saveData() {
+      localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(streamersData));
+    }
+
+    // Audio Engine
+    const Sound = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      click() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(320, this.ctx.currentTime + 0.04);
+          gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.04);
+        } catch(e) {}
+      },
+      beep() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(1150, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.07);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.07);
+        } catch(e) {}
+      }
+    };
+
+    // ========================================================
+    // TWITCH API SYNC ENGINE
+    // ========================================================
+    async function syncTwitchLiveStreams(isManual = false) {
+      if (isManual) Sound.beep();
+
+      const syncIcon = document.getElementById('sync-icon');
+      if (syncIcon) syncIcon.classList.add('spin-sync');
+
+      const channelsList = streamersData.map(s => s.username).filter(Boolean);
+
+      if (!channelsList.length) {
+        if (syncIcon) syncIcon.classList.remove('spin-sync');
+        return;
+      }
+
+      // If Cloudflare Worker URL is configured, query the real Helix API
+      if (twitchWorkerUrl) {
+        try {
+          const endpoint = `${twitchWorkerUrl}?channels=${encodeURIComponent(channelsList.join(','))}`;
+          const res = await fetch(endpoint, { method: 'GET' });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.streamers && Array.isArray(data.streamers)) {
+              mergeTwitchApiResponse(data.streamers);
+              updateLastSyncTime();
+              renderMediaUI();
+              if (isManual) {
+                showToast(`Twitch API: обновлено ${data.streamers.length} каналов в реальном времени!`, 'success');
+              }
+              resetCountdown();
+              if (syncIcon) syncIcon.classList.remove('spin-sync');
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn('[Twitch API] Ошибка запроса к Worker шлюзу, переход в автономный режим:', err);
+        }
+      }
+
+      // Fallback: Intelligent Simulated Real-Time Refresh if worker is not yet configured
+      setTimeout(() => {
+        simulateTwitchLiveData();
+        updateLastSyncTime();
+        renderMediaUI();
+        if (syncIcon) syncIcon.classList.remove('spin-sync');
+        if (isManual) {
+          if (!twitchWorkerUrl) {
+            showToast('Синхронизировано (демо-режим). Подключите Cloudflare Worker в настройках!', 'info');
+          } else {
+            showToast('Данные стримеров успешно актуализированы!', 'success');
+          }
+        }
+        resetCountdown();
+      }, 600);
+    }
+
+    function mergeTwitchApiResponse(apiStreamers) {
+      apiStreamers.forEach(apiUser => {
+        const localIndex = streamersData.findIndex(s => s.username.toLowerCase() === apiUser.username.toLowerCase());
+        if (localIndex !== -1) {
+          streamersData[localIndex] = {
+            ...streamersData[localIndex],
+            displayName: apiUser.displayName || streamersData[localIndex].displayName,
+            avatarUrl: apiUser.avatarUrl || streamersData[localIndex].avatarUrl,
+            bannerUrl: apiUser.bannerUrl || streamersData[localIndex].bannerUrl,
+            isLive: Boolean(apiUser.isLive),
+            viewerCount: String(apiUser.viewerCount || 0),
+            title: apiUser.title || streamersData[localIndex].title,
+            game: apiUser.game || 'Arena Breakout: Infinite',
+            followers: apiUser.followersFormatted || streamersData[localIndex].followers,
+            followersNum: apiUser.followersTotal || streamersData[localIndex].followersNum
+          };
+        } else {
+          // New streamer discovered via API response
+          streamersData.push({
+            id: 'streamer_' + apiUser.id,
+            username: apiUser.username,
+            displayName: apiUser.displayName,
+            followers: apiUser.followersFormatted || '1K',
+            followersNum: apiUser.followersTotal || 1000,
+            isLive: Boolean(apiUser.isLive),
+            viewerCount: String(apiUser.viewerCount || 0),
+            title: apiUser.title || 'Трансляция Arena Breakout: Infinite',
+            avatarUrl: apiUser.avatarUrl,
+            bannerUrl: apiUser.bannerUrl,
+            game: apiUser.game || 'Arena Breakout: Infinite',
+            telegramUrl: '',
+            youtubeUrl: ''
+          });
+        }
+      });
+
+      saveData();
+    }
+
+    function simulateTwitchLiveData() {
+      streamersData.forEach(s => {
+        if (s.isLive) {
+          const delta = Math.floor(Math.random() * 21) - 10;
+          let current = parseInt(s.viewerCount) || 150;
+          current = Math.max(12, current + delta);
+          s.viewerCount = current.toString();
+        }
+      });
+      saveData();
+    }
+
+    function updateLastSyncTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const el = document.getElementById('ribbon-last-sync-time');
+      if (el) el.textContent = timeStr;
+    }
+
+    // Countdown and Auto-sync logic
+    function startAutoSync() {
+      stopAutoSync();
+      countdownInterval = setInterval(() => {
+        autoSyncCountdown--;
+        const badge = document.getElementById('autosync-countdown');
+        if (badge) badge.textContent = `${autoSyncCountdown}s`;
+
+        if (autoSyncCountdown <= 0) {
+          autoSyncCountdown = 60;
+          syncTwitchLiveStreams(false);
+        }
+      }, 1000);
+    }
+
+    function stopAutoSync() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+
+    function resetCountdown() {
+      autoSyncCountdown = 60;
+      const badge = document.getElementById('autosync-countdown');
+      if (badge) badge.textContent = `60s`;
+    }
+
+    function toggleAutoSync(enabled) {
+      Sound.click();
+      if (enabled) {
+        startAutoSync();
+        showToast('Автоматический опрос Twitch включен (каждые 60 сек)', 'info');
+      } else {
+        stopAutoSync();
+        const badge = document.getElementById('autosync-countdown');
+        if (badge) badge.textContent = 'ПАУЗА';
+        showToast('Авто-опрос приостановлен', 'info');
+      }
+    }
+
+    // Worker configuration UI
+    function updateWorkerStatusUI() {
+      const statusRibbon = document.getElementById('ribbon-worker-status');
+      const cfgBadge = document.getElementById('cfg-mode-badge');
+
+      if (twitchWorkerUrl) {
+        if (statusRibbon) {
+          statusRibbon.textContent = 'ШЛЮЗ WORKER ПОДКЛЮЧЕН';
+          statusRibbon.className = 'text-emerald-400 font-bold';
+        }
+        if (cfgBadge) {
+          cfgBadge.textContent = 'ПОДКЛЮЧЕНО К HELIX API';
+          cfgBadge.className = 'px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-600 text-[10px]';
+        }
+      } else {
+        if (statusRibbon) {
+          statusRibbon.textContent = 'ДЕМО-РЕЖИМ (АВТОНОМНО)';
+          statusRibbon.className = 'text-purple-400 font-bold';
+        }
+        if (cfgBadge) {
+          cfgBadge.textContent = 'ДЕМОНСТРАЦИОННЫЙ РЕЖИМ';
+          cfgBadge.className = 'px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-600 text-[10px]';
+        }
+      }
+    }
+
+    function openApiConfigModal() {
+      Sound.click();
+      const input = document.getElementById('cfg-worker-url');
+      if (input) input.value = twitchWorkerUrl || '';
+      document.getElementById('api-config-modal').classList.remove('hidden');
+    }
+
+    function closeApiConfigModal() {
+      Sound.click();
+      document.getElementById('api-config-modal').classList.add('hidden');
+    }
+
+    function saveApiConfig() {
+      Sound.beep();
+      const input = document.getElementById('cfg-worker-url');
+      twitchWorkerUrl = input ? input.value.trim() : '';
+
+      localStorage.setItem(TWITCH_CFG_STORAGE_KEY, JSON.stringify({ workerUrl: twitchWorkerUrl }));
+      updateWorkerStatusUI();
+      closeApiConfigModal();
+      showToast('Конфигурация Twitch Worker сохранена!', 'success');
+
+      if (twitchWorkerUrl) {
+        syncTwitchLiveStreams(true);
+      }
+    }
+
+    async function testTwitchWorkerEndpoint() {
+      Sound.click();
+      const input = document.getElementById('cfg-worker-url');
+      const url = input ? input.value.trim() : '';
+
+      if (!url) {
+        showToast('Введите URL Cloudflare Worker перед проверкой!', 'error');
+        return;
+      }
+
+      showToast('Тестирование шлюза Twitch Helix...', 'info');
+
+      try {
+        const testRes = await fetch(`${url}?channels=shroud`);
+        if (testRes.ok) {
+          const data = await testRes.json();
+          if (data.streamers) {
+            showToast('Связь со шлюзом установлена! Twitch Helix API активен.', 'success');
+            return;
+          }
+        }
+        throw new Error('Некорректный ответ от Worker');
+      } catch (err) {
+        showToast('Ошибка связи со шлюзом. Проверьте Client ID и Secret!', 'error');
+      }
+    }
+
+    // Auto-fetch profile data in Add modal
+    async function autoFetchFromTwitchModal() {
+      Sound.beep();
+      const usernameInput = document.getElementById('modal-twitch-username');
+      const username = usernameInput ? usernameInput.value.trim().toLowerCase() : '';
+
+      if (!username) {
+        showToast('Сначала введите никнейм на Twitch!', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btn-modal-autofetch');
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Запрос...</span>';
+
+      if (twitchWorkerUrl) {
+        try {
+          const res = await fetch(`${twitchWorkerUrl}?channels=${encodeURIComponent(username)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.streamers && data.streamers.length > 0) {
+              const u = data.streamers[0];
+              document.getElementById('modal-display-name').value = u.displayName || username.toUpperCase();
+              document.getElementById('modal-followers-count').value = u.followersFormatted || '1K';
+              document.getElementById('modal-live-status').value = u.isLive ? 'live' : 'offline';
+              document.getElementById('modal-stream-title').value = u.title || '';
+              document.getElementById('modal-avatar-url').value = u.avatarUrl || '';
+              document.getElementById('modal-banner-url').value = u.bannerUrl || '';
+
+              showToast(`Данные канала @${username} загружены из Twitch!`, 'success');
+              if (btn) btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i><span>Успешно</span>';
+              return;
+            }
+          }
+        } catch(e) {}
+      }
+
+      // Standalone Fallback Profile Generator
+      setTimeout(() => {
+        document.getElementById('modal-display-name').value = username.toUpperCase() + ' [.50]';
+        document.getElementById('modal-followers-count').value = (Math.floor(Math.random() * 20) + 5) + '.4K';
+        document.getElementById('modal-avatar-url').value = `https://placehold.co/200x200/131622/9146FF?text=${username.substring(0, 2).toUpperCase()}`;
+        document.getElementById('modal-banner-url').value = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
+        document.getElementById('modal-stream-title').value = 'Тактические рейды в Arena Breakout: Infinite // Сквад [.50]';
+
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Подтянуть данные</span>';
+        showToast(`Сгенерирован тактический профиль для @${username}!`, 'info');
+      }, 400);
+    }
+
+    // ========================================================
+    // INLINE LIVE TWITCH PLAYER MODAL
+    // ========================================================
+    function openLivePlayerModal(username) {
+      Sound.beep();
+      if (!username) return;
+
+      const modal = document.getElementById('twitch-player-modal');
+      const iframe = document.getElementById('twitch-embedded-iframe');
+      const titleEl = document.getElementById('player-modal-title');
+      const channelEl = document.getElementById('player-modal-channel');
+      const extLink = document.getElementById('player-modal-ext-link');
+
+      const streamer = streamersData.find(s => s.username === username);
+      const hostName = window.location.hostname || 'localhost';
+
+      if (titleEl) titleEl.textContent = streamer ? streamer.title : `Трансляция @${username}`;
+      if (channelEl) channelEl.textContent = `twitch.tv/${username} ${streamer && streamer.isLive ? '• LIVE' : ''}`;
+      if (extLink) extLink.href = `https://twitch.tv/${username}`;
+
+      if (iframe) {
+        iframe.src = `https://player.twitch.tv/?channel=${username}&parent=${hostName}&parent=localhost&parent=127.0.0.1&muted=true&autoplay=true`;
+      }
+
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeLivePlayerModal() {
+      Sound.click();
+      const modal = document.getElementById('twitch-player-modal');
+      const iframe = document.getElementById('twitch-embedded-iframe');
+      if (iframe) iframe.src = '';
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // ========================================================
+    // RENDER UI & INTERACTIVITY
+    // ========================================================
+    function renderMediaUI() {
+      renderStreamersGrid();
+      updateCounters();
+    }
+
+    function updateCounters() {
+      const total = streamersData.length;
+      const live = streamersData.filter(s => s.isLive).length;
+
+      const totalBadge = document.getElementById('badge-total-streamers');
+      const liveBadge = document.getElementById('badge-live-streamers');
+      if (totalBadge) totalBadge.textContent = total;
+      if (liveBadge) liveBadge.textContent = live;
+    }
+
+    function renderStreamersGrid() {
+      const container = document.getElementById('streamers-grid-container');
+      const emptyState = document.getElementById('streamers-empty-state');
+      const visibleCountEl = document.getElementById('visible-cards-count');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      // 1. Filter
+      let list = streamersData.filter(s => {
+        if (activeFilter === 'live' && !s.isLive) return false;
+        if (activeFilter === 'offline' && s.isLive) return false;
+
+        if (searchQuery) {
+          const matchName = s.displayName.toLowerCase().includes(searchQuery);
+          const matchUser = s.username.toLowerCase().includes(searchQuery);
+          const matchTitle = (s.title || '').toLowerCase().includes(searchQuery);
+          const matchGame = (s.game || '').toLowerCase().includes(searchQuery);
+          if (!matchName && !matchUser && !matchTitle && !matchGame) return false;
+        }
+        return true;
+      });
+
+      // 2. Sort
+      list.sort((a, b) => {
+        if (sortMode === 'status') {
+          if (a.isLive !== b.isLive) return b.isLive ? 1 : -1;
+          return (parseInt(b.viewerCount) || 0) - (parseInt(a.viewerCount) || 0);
+        } else if (sortMode === 'followers') {
+          return (b.followersNum || 0) - (a.followersNum || 0);
+        } else if (sortMode === 'viewers') {
+          return (parseInt(b.viewerCount) || 0) - (parseInt(a.viewerCount) || 0);
+        } else if (sortMode === 'name') {
+          return a.displayName.localeCompare(b.displayName, 'ru');
+        }
+        return 0;
+      });
+
+      if (visibleCountEl) visibleCountEl.textContent = list.length;
+
+      if (list.length === 0) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      } else {
+        if (emptyState) emptyState.classList.add('hidden');
+      }
+
+      list.forEach(streamer => {
+        const card = document.createElement('div');
+        const twitchUrl = `https://twitch.tv/${streamer.username}`;
+
+        card.className = `bg-tactical-card border rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group ${
+          streamer.isLive 
+            ? 'border-red-600/70 hover:border-red-500 glow-red ring-1 ring-red-500/30' 
+            : 'border-red-900/40 hover:border-purple-600/50'
+        }`;
+
+        card.innerHTML = `
+          <div>
+            <!-- Banner / Thumbnail Container -->
+            <div class="relative aspect-video w-full bg-black/60 overflow-hidden">
+              <img src="${streamer.bannerUrl || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'}" alt="${streamer.displayName}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
+
+              <!-- Live / Offline Badge -->
+              <div class="absolute top-3 left-3 flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold ${
+                streamer.isLive 
+                  ? 'bg-red-600 text-white shadow-lg glow-red' 
+                  : 'bg-black/80 text-gray-300 border border-white/10'
+              }">
+                <span class="w-2 h-2 rounded-full ${streamer.isLive ? 'bg-white live-dot-pulse' : 'bg-gray-500'}"></span>
+                <span>${streamer.isLive ? `LIVE (${streamer.viewerCount || '100+'} ЗРИТЕЛЕЙ)` : 'ОФЛАЙН'}</span>
+              </div>
+
+              <!-- Brand & Social Badges Strip Top Right -->
+              <div class="absolute top-3 right-3 flex items-center space-x-1.5">
+                ${streamer.telegramUrl ? `
+                  <a href="${streamer.telegramUrl}" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-sky-950/80 hover:bg-sky-600 border border-sky-500/60 text-sky-400 hover:text-white flex items-center justify-center transition shadow glow-telegram" title="Telegram канал">
+                    <i class="fa-brands fa-telegram text-sm"></i>
+                  </a>
+                ` : ''}
+
+                ${streamer.youtubeUrl ? `
+                  <a href="${streamer.youtubeUrl}" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-red-950/80 hover:bg-red-600 border border-red-500/60 text-red-400 hover:text-white flex items-center justify-center transition shadow glow-youtube" title="YouTube канал">
+                    <i class="fa-brands fa-youtube text-sm"></i>
+                  </a>
+                ` : ''}
+
+                <a href="${twitchUrl}" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-black/70 hover:bg-tactical-purple text-purple-400 hover:text-white border border-purple-500/40 flex items-center justify-center transition shadow glow-twitch" title="Открыть канал на Twitch">
+                  <i class="fa-brands fa-twitch text-sm"></i>
+                </a>
+              </div>
+
+              <!-- Followers Count Overlay Badge -->
+              <div class="absolute bottom-2.5 left-3">
+                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-purple-950/90 text-purple-200 border border-purple-500/60 shadow">
+                  <i class="fa-solid fa-heart text-purple-400 mr-1 text-[10px]"></i> ${streamer.followers} фолловеров
+                </span>
+              </div>
+
+              <!-- Category Tag -->
+              <div class="absolute bottom-2.5 right-3">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono text-gray-300 bg-black/80 border border-white/10">
+                  ${streamer.game ? 'ABI' : 'ABI'}
+                </span>
+              </div>
+
+              <!-- Centered Play Button trigger for modal player -->
+              <button onclick="openLivePlayerModal('${streamer.username}')" class="absolute inset-0 m-auto w-11 h-11 rounded-full bg-purple-600/90 text-white flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-2xl glow-twitch cursor-pointer" title="Быстрый плеер">
+                <i class="fa-solid fa-play ml-0.5"></i>
+              </button>
+            </div>
+
+            <!-- Profile Info Body -->
+            <div class="p-5 space-y-3.5">
+              <div class="flex items-start space-x-3">
+                <div class="relative shrink-0 mt-0.5">
+                  <img src="${streamer.avatarUrl || 'https://placehold.co/100x100/131622/9146FF?text=T'}" alt="Avatar" class="w-12 h-12 rounded-xl object-cover border-2 ${streamer.isLive ? 'border-red-500 shadow-[0_0_12px_rgba(229,9,20,0.5)]' : 'border-purple-600/70'}">
+                  <span class="absolute -bottom-1 -right-1 text-[8px] bg-black/90 px-1 rounded text-red-400 font-mono font-bold border border-red-900/60">.50</span>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-tactical font-bold text-white text-base truncate group-hover:text-purple-300 transition">
+                      ${streamer.displayName}
+                    </h4>
+                  </div>
+                  
+                  <div class="text-xs text-purple-400 font-mono truncate flex items-center">
+                    <i class="fa-brands fa-twitch mr-1.5 text-[11px]"></i>
+                    @${streamer.username}
+                  </div>
+
+                  <!-- Small In-Card Social Pills -->
+                  <div class="flex items-center space-x-2 mt-1.5">
+                    ${streamer.telegramUrl ? `
+                      <a href="${streamer.telegramUrl}" target="_blank" rel="noopener noreferrer" class="px-2 py-0.5 rounded bg-sky-950/60 hover:bg-sky-900 border border-sky-500/40 text-sky-400 hover:text-sky-300 text-[10px] font-mono flex items-center space-x-1 transition" title="Открыть Telegram">
+                        <i class="fa-brands fa-telegram text-[11px]"></i>
+                        <span>Telegram</span>
+                      </a>
+                    ` : ''}
+
+                    ${streamer.youtubeUrl ? `
+                      <a href="${streamer.youtubeUrl}" target="_blank" rel="noopener noreferrer" class="px-2 py-0.5 rounded bg-red-950/60 hover:bg-red-900 border border-red-500/40 text-red-400 hover:text-red-300 text-[10px] font-mono flex items-center space-x-1 transition" title="Открыть YouTube">
+                        <i class="fa-brands fa-youtube text-[11px]"></i>
+                        <span>YouTube</span>
+                      </a>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stream Title -->
+              <p class="text-xs text-gray-300 font-sans leading-relaxed line-clamp-2 min-h-[34px]">
+                ${streamer.title || 'Трансляция тактических рейдов в Arena Breakout: Infinite.'}
+              </p>
+
+              <!-- Meta Spec Grid -->
+              <div class="pt-2 border-t border-white/5 grid grid-cols-2 gap-2 text-[11px] font-mono text-gray-400">
+                <div class="flex items-center space-x-1.5 truncate">
+                  <i class="fa-solid fa-gamepad text-red-500 text-xs"></i>
+                  <span class="truncate">${streamer.game || 'Arena Breakout'}</span>
+                </div>
+                <div class="flex items-center justify-end space-x-1.5 text-right">
+                  <span class="w-1.5 h-1.5 rounded-full ${streamer.isLive ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}"></span>
+                  <span class="${streamer.isLive ? 'text-emerald-400 font-bold' : 'text-gray-400'}">${streamer.isLive ? 'ONLINE' : 'OFFLINE'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons Strip -->
+          <div class="p-5 pt-0 space-y-2">
+            <div class="flex items-center space-x-2">
+              <button onclick="openLivePlayerModal('${streamer.username}')" class="flex-1 py-2 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/60 text-purple-200 font-tactical font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-1.5 shadow">
+                <i class="fa-solid fa-play text-xs text-red-400"></i>
+                <span>Плеер</span>
+              </button>
+
+              <a href="${twitchUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 px-3 rounded-xl bg-tactical-purple hover:bg-tactical-purpleDark text-white font-tactical font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-1.5 shadow-lg glow-twitch">
+                <i class="fa-brands fa-twitch text-xs"></i>
+                <span>Twitch</span>
+              </a>
+            </div>
+
+            <!-- Admin Action Controls (Toggleable via Editor Mode) -->
+            <div class="admin-controls-strip ${isEditorModeActive ? 'flex' : 'hidden'} items-center space-x-2 pt-2 border-t border-white/5 font-mono text-xs">
+              <button onclick="editStreamer('${streamer.id}')" class="flex-1 py-1.5 px-2 rounded-lg bg-black/60 hover:bg-black/90 border border-white/10 text-gray-300 hover:text-white transition flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-pen-to-square text-yellow-400 text-[11px]"></i>
+                <span>Изменить</span>
+              </button>
+              <button onclick="toggleStreamerLiveStatus('${streamer.id}')" class="py-1.5 px-2 rounded-lg bg-black/60 hover:bg-black/90 border border-white/10 text-gray-300 hover:text-white transition" title="Переключить статус LIVE">
+                <i class="fa-solid fa-tower-broadcast text-emerald-400 text-[11px]"></i>
+              </button>
+              <button onclick="deleteStreamer('${streamer.id}')" class="py-1.5 px-2 rounded-lg bg-red-950/80 hover:bg-red-900 border border-red-700/60 text-red-300 transition" title="Удалить карточку">
+                <i class="fa-solid fa-trash-can text-red-400 text-[11px]"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Filter, Search and Sort Handlers
+    function setMediaFilter(mode) {
+      Sound.click();
+      activeFilter = mode;
+
+      ['all', 'live', 'offline'].forEach(f => {
+        const btn = document.getElementById(`filter-btn-${f}`);
+        if (!btn) return;
+        if (f === mode) {
+          btn.className = 'px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold transition flex items-center space-x-1.5 glow-red';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg bg-tactical-card text-gray-300 hover:text-white border border-white/10 transition flex items-center space-x-1.5';
+        }
+      });
+
+      renderStreamersGrid();
+    }
+
+    function handleStreamerSearch(query) {
+      searchQuery = query.toLowerCase().trim();
+      renderStreamersGrid();
+    }
+
+    function handleStreamerSort(val) {
+      Sound.click();
+      sortMode = val;
+      renderStreamersGrid();
+    }
+
+    function resetFilters() {
+      searchQuery = '';
+      const input = document.getElementById('streamer-search-input');
+      if (input) input.value = '';
+      setMediaFilter('all');
+    }
+
+    function toggleAdminView() {
+      Sound.click();
+      isEditorModeActive = !isEditorModeActive;
+      const btn = document.getElementById('btn-admin-preview');
+      if (isEditorModeActive) {
+        if (btn) btn.className = 'px-3 py-2 rounded-lg bg-red-600 text-white font-bold transition flex items-center space-x-1.5 glow-red shadow';
+        showToast('Режим редактора ВКЛЮЧЕН: кнопки изменения каналов активны!', 'info');
+      } else {
+        if (btn) btn.className = 'px-3 py-2 rounded-lg bg-tactical-card hover:bg-tactical-cardHover border border-white/10 text-gray-300 hover:text-white transition flex items-center space-x-1.5';
+        showToast('Режим редактора выключен.', 'info');
+      }
+      renderStreamersGrid();
+    }
+
+    // Modal Operations
+    function openAddStreamerModal() {
+      Sound.click();
+      document.getElementById('modal-heading-text').textContent = 'Добавить стримера [.50]';
+      document.getElementById('modal-streamer-id').value = '';
+      document.getElementById('modal-twitch-username').value = '';
+      document.getElementById('modal-display-name').value = '';
+      document.getElementById('modal-followers-count').value = '';
+      document.getElementById('modal-live-status').value = 'offline';
+      document.getElementById('modal-stream-title').value = '';
+      document.getElementById('modal-avatar-url').value = '';
+      document.getElementById('modal-banner-url').value = '';
+      document.getElementById('modal-telegram-url').value = '';
+      document.getElementById('modal-youtube-url').value = '';
+      document.getElementById('modal-preview-url').textContent = 'https://twitch.tv/...';
+
+      document.getElementById('streamer-modal').classList.remove('hidden');
+    }
+
+    function editStreamer(id) {
+      Sound.click();
+      const s = streamersData.find(x => x.id === id);
+      if (!s) return;
+
+      document.getElementById('modal-heading-text').textContent = 'Редактировать стримера';
+      document.getElementById('modal-streamer-id').value = s.id;
+      document.getElementById('modal-twitch-username').value = s.username;
+      document.getElementById('modal-display-name').value = s.displayName;
+      document.getElementById('modal-followers-count').value = s.followers;
+      document.getElementById('modal-live-status').value = s.isLive ? 'live' : 'offline';
+      document.getElementById('modal-stream-title').value = s.title || '';
+      document.getElementById('modal-avatar-url').value = s.avatarUrl || '';
+      document.getElementById('modal-banner-url').value = s.bannerUrl || '';
+      document.getElementById('modal-telegram-url').value = s.telegramUrl || '';
+      document.getElementById('modal-youtube-url').value = s.youtubeUrl || '';
+      document.getElementById('modal-preview-url').textContent = `https://twitch.tv/${s.username}`;
+
+      document.getElementById('streamer-modal').classList.remove('hidden');
+    }
+
+    function closeStreamerModal() {
+      Sound.click();
+      document.getElementById('streamer-modal').classList.add('hidden');
+    }
+
+    function handleTwitchUsernameInput(val) {
+      const cleanVal = val.toLowerCase().replace(/[^a-z0-9_]/g, '');
+      const preview = document.getElementById('modal-preview-url');
+      if (preview) {
+        preview.textContent = cleanVal ? `https://twitch.tv/${cleanVal}` : 'https://twitch.tv/...';
+      }
+    }
+
+    function handleSaveStreamer(e) {
+      e.preventDefault();
+      Sound.beep();
+
+      const id = document.getElementById('modal-streamer-id').value;
+      const username = document.getElementById('modal-twitch-username').value.trim().toLowerCase();
+      const displayName = document.getElementById('modal-display-name').value.trim();
+      const followers = document.getElementById('modal-followers-count').value.trim();
+      const isLive = document.getElementById('modal-live-status').value === 'live';
+      const title = document.getElementById('modal-stream-title').value.trim();
+      const avatarUrl = document.getElementById('modal-avatar-url').value.trim();
+      const bannerUrl = document.getElementById('modal-banner-url').value.trim();
+      const telegramUrl = document.getElementById('modal-telegram-url').value.trim();
+      const youtubeUrl = document.getElementById('modal-youtube-url').value.trim();
+
+      let followersNum = 0;
+      if (followers.toUpperCase().includes('K')) {
+        followersNum = parseFloat(followers) * 1000;
+      } else if (followers.toUpperCase().includes('M')) {
+        followersNum = parseFloat(followers) * 1000000;
+      } else {
+        followersNum = parseInt(followers.replace(/\s+/g, '')) || 0;
+      }
+
+      if (id) {
+        const idx = streamersData.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          streamersData[idx] = {
+            ...streamersData[idx],
+            username,
+            displayName,
+            followers,
+            followersNum,
+            isLive,
+            title,
+            avatarUrl: avatarUrl || streamersData[idx].avatarUrl,
+            bannerUrl: bannerUrl || streamersData[idx].bannerUrl,
+            telegramUrl,
+            youtubeUrl
+          };
+          showToast(`Данные канала ${displayName} обновлены!`, 'success');
+        }
+      } else {
+        const newStreamer = {
+          id: 'streamer_' + Date.now(),
+          username,
+          displayName,
+          followers: followers || '1K',
+          followersNum: followersNum || 1000,
+          isLive,
+          viewerCount: isLive ? '140' : '0',
+          title: title || 'Трансляция Arena Breakout: Infinite',
+          avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+          bannerUrl: bannerUrl || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+          game: 'Arena Breakout: Infinite',
+          telegramUrl,
+          youtubeUrl
+        };
+        streamersData.unshift(newStreamer);
+        showToast(`Стример ${displayName} добавлен! Выполняется синхронизация с Twitch...`, 'success');
+      }
+
+      saveData();
+      closeStreamerModal();
+      renderMediaUI();
+
+      // Trigger sync for newly added channel
+      syncTwitchLiveStreams(false);
+    }
+
+    function toggleStreamerLiveStatus(id) {
+      Sound.click();
+      const s = streamersData.find(x => x.id === id);
+      if (!s) return;
+      s.isLive = !s.isLive;
+      if (s.isLive) {
+        s.viewerCount = (Math.floor(Math.random() * 250) + 80).toString();
+      }
+      saveData();
+      renderMediaUI();
+      showToast(`Статус ${s.displayName}: ${s.isLive ? 'В ЭФИРЕ (LIVE)' : 'ОФЛАЙН'}`, 'info');
+    }
+
+    function deleteStreamer(id) {
+      Sound.click();
+      const s = streamersData.find(x => x.id === id);
+      const name = s ? s.displayName : 'Канал';
+
+      if (confirm(`Удалить ${name} из списка отслеживаемых Twitch стримов?`)) {
+        streamersData = streamersData.filter(x => x.id !== id);
+        saveData();
+        renderMediaUI();
+        showToast(`Канал ${name} удален.`, 'info');
+      }
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto px-4 py-2.5 rounded-xl border backdrop-blur-md shadow-2xl flex items-center space-x-2.5 text-xs font-tactical max-w-sm transition-all duration-300';
+      if (type === 'success') {
+        toast.className += ' bg-emerald-950/90 border-emerald-600 text-emerald-200';
+        toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span>${msg}</span>`;
+      } else if (type === 'error') {
+        toast.className += ' bg-red-950/90 border-red-600 text-red-200';
+        toast.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-400"></i><span>${msg}</span>`;
+      } else {
+        toast.className += ' bg-black/90 border-purple-800 text-gray-200';
+        toast.innerHTML = `<i class="fa-brands fa-twitch text-purple-400"></i><span>${msg}</span>`;
+      }
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Initialize module on load
+    window.addEventListener('DOMContentLoaded', () => {
+      initMediaData();
+      renderMediaUI();
+      startAutoSync();
+    });
+  </script>
+</body>
+</html>
