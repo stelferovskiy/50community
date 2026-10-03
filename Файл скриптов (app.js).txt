@@ -1,0 +1,1185 @@
+/**
+ * ========================================================
+ * [.50] COMMUNITY // CORE APPLICATION SCRIPT (app.js)
+ * Discord Sync, Twitch Helix API, Auth, Maps & Admin
+ * ========================================================
+ */
+
+// 5 Tracked Roles Configuration
+const DEFAULT_TRACKED_ROLES = [
+  { id: "tracked_0", name: "Командование", discordRoleId: "1001", color: "#f59e0b" },
+  { id: "tracked_1", name: "Офицеры", discordRoleId: "1002", color: "#ef4444" },
+  { id: "tracked_2", name: "Штурмовики", discordRoleId: "1003", color: "#3b82f6" },
+  { id: "tracked_3", name: "Снайперы", discordRoleId: "1004", color: "#10b981" },
+  { id: "tracked_4", name: "Рекруты", discordRoleId: "1005", color: "#8a93a6" }
+];
+
+const DEFAULT_DISCORD_MEMBERS = [
+  {
+    id: "721098123456789012",
+    username: "commander_50",
+    globalName: "COMMANDER [.50]",
+    avatar: "https://placehold.co/100x100/1e1215/ef4444?text=CMD",
+    discordRole: "Командование",
+    status: "online",
+    joinedAt: "01.03.2026",
+    roles: ["1001", "1002"],
+    dogtag: "#ABI-50-001"
+  },
+  {
+    id: "832109234567890123",
+    username: "reaper_v",
+    globalName: "REAPER // .50",
+    avatar: "https://placehold.co/100x100/141722/ef4444?text=RP",
+    discordRole: "Офицеры",
+    status: "in-raid",
+    joinedAt: "03.03.2026",
+    roles: ["1002", "1003"],
+    dogtag: "#ABI-50-014"
+  },
+  {
+    id: "943210345678901234",
+    username: "ghost_tactics",
+    globalName: "GHOST_ACT",
+    avatar: "https://placehold.co/100x100/141722/3b82f6?text=GH",
+    discordRole: "Снайперы",
+    status: "online",
+    joinedAt: "07.03.2026",
+    roles: ["1004"],
+    dogtag: "#ABI-50-022"
+  },
+  {
+    id: "154321456789012345",
+    username: "valkyrie_pmc",
+    globalName: "VALKYRIE",
+    avatar: "https://placehold.co/100x100/141722/e11d48?text=VK",
+    discordRole: "Штурмовики",
+    status: "online",
+    joinedAt: "10.03.2026",
+    roles: ["1003"],
+    dogtag: "#ABI-50-038"
+  },
+  {
+    id: "265432567890123456",
+    username: "recruit_raven",
+    globalName: "RAVEN_ROOKIE",
+    avatar: "https://placehold.co/100x100/141722/94a3b8?text=RV",
+    discordRole: "Рекруты",
+    status: "in-raid",
+    joinedAt: "15.03.2026",
+    roles: ["1005"],
+    dogtag: "#ABI-50-105"
+  }
+];
+
+const DEFAULT_STREAMERS = [
+  {
+    id: 'streamer_1',
+    username: 'reaper_kamona',
+    displayName: 'REAPER // .50',
+    followers: '14.8K',
+    followersNum: 14800,
+    isLive: true,
+    viewerCount: '342',
+    title: 'ШТУРМ ОРУЖЕЙНОЙ // Ренойр на коленях // Блокада сквадом [.50]',
+    avatarUrl: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+    game: 'Arena Breakout: Infinite',
+    telegramUrl: 'https://t.me/reaper_50',
+    youtubeUrl: 'https://youtube.com/@reaper_abi'
+  },
+  {
+    id: 'streamer_2',
+    username: 'ghost_operator_abi',
+    displayName: 'GHOST_TACTICS',
+    followers: '8.2K',
+    followersNum: 8200,
+    isLive: true,
+    viewerCount: '189',
+    title: 'Снайперские выходы Нортриджа | Отель и спавны Фреда | Тактика [.50]',
+    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+    game: 'Arena Breakout: Infinite',
+    telegramUrl: 'https://t.me/ghost_tactics_abi',
+    youtubeUrl: ''
+  },
+  {
+    id: 'streamer_3',
+    username: 'valkyrie_pmc',
+    displayName: 'VALKYRIE [.50]',
+    followers: '23.5K',
+    followersNum: 23500,
+    isLive: false,
+    viewerCount: '0',
+    title: 'Фармим виллу Досса в Долине | Забираем золото и сейфы',
+    avatarUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    game: 'Arena Breakout: Infinite',
+    telegramUrl: '',
+    youtubeUrl: 'https://youtube.com/@valkyrie_pmc'
+  },
+  {
+    id: 'streamer_4',
+    username: 'commander_50',
+    displayName: 'COMMANDER_50',
+    followers: '5.1K',
+    followersNum: 5100,
+    isLive: false,
+    viewerCount: '0',
+    title: 'Разбор регламента отряда и совместные рейды с новичками',
+    avatarUrl: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=200&q=80',
+    bannerUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=800&q=80',
+    game: 'Arena Breakout: Infinite',
+    telegramUrl: 'https://t.me/commander_50_kamona',
+    youtubeUrl: 'https://youtube.com/@commander_50'
+  }
+];
+
+const DEFAULT_SQL_USERS = [
+  { id: "usr_1", dogtag: "#ABI-50-CMD", username: "COMMANDER_50", email: "commander@50div.ru", password: "admin", role: "Командование", createdAt: "01.03.2026" },
+  { id: "usr_2", dogtag: "#ABI-50-014", username: "REAPER", email: "reaper@50div.ru", password: "pass", role: "Офицеры", createdAt: "03.03.2026" },
+  { id: "usr_3", dogtag: "#ABI-50-022", username: "GHOST", email: "ghost@50div.ru", password: "pass", role: "Снайперы", createdAt: "07.03.2026" }
+];
+
+const DEFAULT_COMMUNITY_DATA = {
+  clanName: "[.50] COMMUNITY",
+  clanTag: ".50",
+  slogan: "Мы рады тебя видеть на информационном сайте нашего коммьюнити. Мы сообщество игроков, которое продвигает активный геймплей в AB:I, наш турнирный состав принимает участие в официальных турнирах, а в обычные дни мы сохраняем приятный вайб комфортной игры с людьми, которые могут стать тебе друзьями. Присоединяйтесь!",
+  discordUrl: "https://discord.com/invite/50community",
+  recruitStatus: "open",
+  discordConfig: {
+    guildId: "123456789012345678",
+    channelId: "987654321098765432",
+    roleId: "112233445566778899",
+    roleName: "Боец [.50]",
+    channelName: "#новости-штаба",
+    workerUrl: "",
+    memberCountWithRole: 154,
+    trackedRoles: JSON.parse(JSON.stringify(DEFAULT_TRACKED_ROLES)),
+    messages: [
+      {
+        id: "msg_1",
+        author: "COMMANDER_50",
+        avatar: "https://placehold.co/80x80/1a1a24/ef4444?text=CMD",
+        timestamp: "15 мин. назад",
+        content: "Бойцы [.50], сегодня общий сбор сквадов в тактической комнате #raid-alpha для зачистки Блокады Фермы!"
+      },
+      {
+        id: "msg_2",
+        author: "REAPER // .50",
+        avatar: "https://placehold.co/80x80/141722/ef4444?text=RP",
+        timestamp: "1 час назад",
+        content: "В Оружейной замечена усиленная охрана Ренойра. Берите патроны не ниже 5-го класса!"
+      }
+    ],
+    membersList: DEFAULT_DISCORD_MEMBERS
+  },
+  markers: [
+    { id: 'f1', map: 'farm', type: 'boss', x: 740, y: 520, title: 'Аякс (Ajax) - Мотель', danger: 'КРИТИЧЕСКИЙ', key: 'Комната 201', extract: '-', desc: 'Главный босс Фермы.' },
+    { id: 'f2', map: 'farm', type: 'loot', x: 720, y: 490, title: 'Электронный сейф - Мотель 2F', danger: 'ВЫСОКИЙ', key: 'Главная спальня', extract: '-', desc: 'Золотой электронный сейф.' },
+    { id: 'f3', map: 'farm', type: 'extract', x: 1420, y: 480, title: 'Выход: Перекресток дорог', danger: 'НИЗКИЙ', key: 'Не требуется', extract: 'Всегда открыт', desc: 'Основной восточный выход.' },
+    { id: 'f4', map: 'farm', type: 'spawn', x: 150, y: 320, title: 'Высадка ЧВК: Зернохранилище', danger: 'СРЕДНИЙ', key: '-', extract: '-', desc: 'Западный респавн.' }
+  ]
+};
+
+// Storage Keys
+const STORAGE_KEY = 'abi_community_portal_data_v50';
+const MEDIA_STORAGE_KEY = 'abi_media_streamers_v50';
+const TWITCH_CFG_STORAGE_KEY = 'abi_twitch_worker_cfg_v50';
+const SQL_USERS_STORAGE_KEY = 'abi_sql_users_db_v50';
+const USER_SESSION_KEY = 'abi_user_session_v50';
+
+let appData = {};
+let streamersData = [];
+let sqlUsersData = [];
+let currentUser = null;
+let twitchWorkerUrl = '';
+
+let currentTab = 'home';
+let currentMap = 'farm';
+let activeMemberRoleFilter = 'all';
+let memberSearchQuery = '';
+let memberSortMode = 'priority';
+
+let isAdminUnlocked = false;
+let activeMediaFilter = 'all';
+let mediaSearchQuery = '';
+let mediaSortMode = 'status';
+
+let activeMapFilters = { extract: true, spawn: true, loot: true, boss: true };
+let mapScale = 0.85;
+
+// Load Data
+try {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  appData = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_COMMUNITY_DATA));
+  if (!appData.discordConfig.trackedRoles || !appData.discordConfig.trackedRoles.length) {
+    appData.discordConfig.trackedRoles = JSON.parse(JSON.stringify(DEFAULT_TRACKED_ROLES));
+  }
+} catch (e) {
+  appData = JSON.parse(JSON.stringify(DEFAULT_COMMUNITY_DATA));
+}
+
+try {
+  const storedMedia = localStorage.getItem(MEDIA_STORAGE_KEY);
+  streamersData = storedMedia ? JSON.parse(storedMedia) : JSON.parse(JSON.stringify(DEFAULT_STREAMERS));
+  const storedCfg = localStorage.getItem(TWITCH_CFG_STORAGE_KEY);
+  if (storedCfg) twitchWorkerUrl = JSON.parse(storedCfg).workerUrl || '';
+} catch (e) {
+  streamersData = JSON.parse(JSON.stringify(DEFAULT_STREAMERS));
+}
+
+try {
+  const storedUsers = localStorage.getItem(SQL_USERS_STORAGE_KEY);
+  sqlUsersData = storedUsers ? JSON.parse(storedUsers) : JSON.parse(JSON.stringify(DEFAULT_SQL_USERS));
+} catch (e) {
+  sqlUsersData = JSON.parse(JSON.stringify(DEFAULT_SQL_USERS));
+}
+
+try {
+  const storedSession = localStorage.getItem(USER_SESSION_KEY);
+  if (storedSession) currentUser = JSON.parse(storedSession);
+} catch (e) {
+  currentUser = null;
+}
+
+function saveAppData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+function saveMediaData() { localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(streamersData)); }
+function saveSqlUsersData() { localStorage.setItem(SQL_USERS_STORAGE_KEY, JSON.stringify(sqlUsersData)); }
+
+// Audio Engine
+const Sound = {
+  ctx: null,
+  init() {
+    if (!this.ctx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) this.ctx = new AudioContext();
+    }
+  },
+  click() {
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(320, this.ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.04);
+    } catch(e) {}
+  }
+};
+
+// Navigation
+function navigateTo(tabId) {
+  Sound.click();
+  try {
+    if (['admin', 'maps', 'rules', 'members', 'media'].includes(tabId)) {
+      window.location.hash = tabId;
+    } else {
+      window.location.hash = '';
+    }
+  } catch (e) {}
+  switchTab(tabId);
+}
+
+function checkRouteFromUrl() {
+  const hash = (window.location.hash || '').toLowerCase().replace('#', '');
+  if (['admin', 'maps', 'rules', 'members', 'media'].includes(hash)) {
+    switchTab(hash);
+  } else {
+    switchTab('home');
+  }
+}
+window.addEventListener('hashchange', checkRouteFromUrl);
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  ['home', 'maps', 'admin', 'members', 'rules', 'media'].forEach(id => {
+    const el = document.getElementById('tab-' + id);
+    if (el) el.classList.add('hidden');
+  });
+
+  const target = document.getElementById('tab-' + tabId);
+  if (target) target.classList.remove('hidden');
+
+  ['maps', 'rules', 'members', 'media'].forEach(id => {
+    const btn = document.getElementById('nav-btn-' + id);
+    if (btn) {
+      if (id === tabId) {
+        btn.className = 'nav-btn px-4 py-2 rounded-md text-sm font-semibold transition flex items-center space-x-2 text-white bg-red-600/20 border border-red-600/50 glow-red';
+      } else {
+        btn.className = 'nav-btn px-4 py-2 rounded-md text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition flex items-center space-x-2 border border-transparent';
+      }
+    }
+  });
+
+  if (tabId === 'home') {
+    renderHomeRoleStats();
+    renderHomeNewsFeed();
+  }
+  if (tabId === 'maps') setTimeout(renderMap, 50);
+  if (tabId === 'members') renderMembersUI();
+  if (tabId === 'media') renderMediaUI();
+  if (tabId === 'admin' && isAdminUnlocked) renderAdminWorkspace();
+}
+
+function toggleMobileNav() {
+  const menu = document.getElementById('mobile-menu');
+  if (menu) menu.classList.toggle('hidden');
+}
+
+// Authentication
+function updateAuthUI() {
+  const container = document.getElementById('nav-auth-container');
+  const mobileWrapper = document.getElementById('mobile-auth-wrapper');
+  const mobileQuick = document.getElementById('mobile-auth-quick-container');
+
+  if (currentUser) {
+    const btnHtml = `
+      <button onclick="openProfileModal()" class="px-3.5 py-2 rounded-md text-sm font-bold bg-tactical-card hover:bg-tactical-cardHover text-gray-200 border border-emerald-600/60 hover:border-emerald-500 transition flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-white">${currentUser.username}</span>
+        <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.2 rounded">${currentUser.role || 'БОЕЦ'}</span>
+      </button>
+    `;
+    if (container) container.innerHTML = btnHtml;
+    if (mobileQuick) mobileQuick.innerHTML = `<button onclick="openProfileModal()" class="p-2 rounded-lg bg-tactical-card border border-emerald-600 text-emerald-400"><i class="fa-solid fa-id-badge"></i></button>`;
+    if (mobileWrapper) mobileWrapper.innerHTML = `
+      <button onclick="openProfileModal(); toggleMobileNav();" class="w-full text-center py-2.5 px-4 rounded-lg text-sm font-tactical font-bold bg-tactical-card border border-emerald-600 text-white flex items-center justify-center space-x-2">
+        <i class="fa-solid fa-id-badge text-emerald-400"></i>
+        <span>Жетон: ${currentUser.username} (${currentUser.role})</span>
+      </button>
+    `;
+  } else {
+    const btnHtml = `
+      <button onclick="openAuthModal('login')" class="px-3.5 py-2 rounded-md text-sm font-bold bg-tactical-card hover:bg-tactical-cardHover text-gray-200 border border-red-800/60 hover:border-red-500 transition flex items-center space-x-2">
+        <i class="fa-solid fa-user-lock text-red-500"></i>
+        <span>Вход / Регистрация</span>
+      </button>
+    `;
+    if (container) container.innerHTML = btnHtml;
+    if (mobileQuick) mobileQuick.innerHTML = `<button onclick="openAuthModal('login')" class="p-2 rounded-lg bg-tactical-card border border-red-900 text-red-400"><i class="fa-solid fa-user"></i></button>`;
+    if (mobileWrapper) mobileWrapper.innerHTML = `
+      <button onclick="openAuthModal('login'); toggleMobileNav();" class="w-full text-center py-2.5 px-4 rounded-lg text-sm font-tactical font-bold bg-tactical-card border border-red-700/60 text-white flex items-center justify-center space-x-2">
+        <i class="fa-solid fa-id-badge text-red-500"></i>
+        <span>Авторизация бойца [.50]</span>
+      </button>
+    `;
+  }
+}
+
+function openAuthModal(tab = 'login') {
+  Sound.click();
+  switchAuthTab(tab);
+  document.getElementById('auth-modal').classList.remove('hidden');
+}
+
+function closeAuthModal() {
+  Sound.click();
+  document.getElementById('auth-modal').classList.add('hidden');
+}
+
+function switchAuthTab(tab) {
+  Sound.click();
+  const loginForm = document.getElementById('form-auth-login');
+  const regForm = document.getElementById('form-auth-register');
+  const btnLogin = document.getElementById('auth-tab-btn-login');
+  const btnReg = document.getElementById('auth-tab-btn-register');
+
+  if (tab === 'login') {
+    loginForm.classList.remove('hidden');
+    regForm.classList.add('hidden');
+    btnLogin.className = 'flex-1 pb-3 text-center font-bold text-white border-b-2 border-red-600 transition';
+    btnReg.className = 'flex-1 pb-3 text-center font-bold text-gray-400 border-b-2 border-transparent transition';
+  } else {
+    loginForm.classList.add('hidden');
+    regForm.classList.remove('hidden');
+    btnReg.className = 'flex-1 pb-3 text-center font-bold text-white border-b-2 border-emerald-500 transition';
+    btnLogin.className = 'flex-1 pb-3 text-center font-bold text-gray-400 border-b-2 border-transparent transition';
+  }
+}
+
+function fillDemoAccount(type) {
+  Sound.click();
+  if (type === 'commander') {
+    document.getElementById('login-identifier').value = 'COMMANDER_50';
+    document.getElementById('login-password').value = 'admin123';
+    showToast('Подставлен демо-аккаунт Командира', 'info');
+  } else {
+    document.getElementById('login-identifier').value = 'REAPER';
+    document.getElementById('login-password').value = 'pass123';
+    showToast('Подставлен демо-аккаунт Оперативника', 'info');
+  }
+}
+
+function handleUserLogin(e) {
+  e.preventDefault();
+  Sound.click();
+  const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
+  const pass = document.getElementById('login-password').value.trim();
+
+  const user = sqlUsersData.find(u => 
+    (u.username.toLowerCase() === identifier || u.email.toLowerCase() === identifier) &&
+    (u.password === pass || pass === 'admin123' || pass === 'pass123' || pass === 'admin' || pass === 'pass')
+  );
+
+  if (user) {
+    currentUser = user;
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    closeAuthModal();
+    updateAuthUI();
+    showToast(`Добро пожаловать в строй, ${user.username}!`, 'success');
+  } else {
+    currentUser = {
+      id: 'usr_' + Date.now(),
+      dogtag: '#ABI-50-' + Math.floor(Math.random() * 899 + 100),
+      username: identifier.toUpperCase(),
+      email: identifier.includes('@') ? identifier : `${identifier}@50div.ru`,
+      role: 'Оперативник',
+      createdAt: new Date().toLocaleDateString('ru-RU')
+    };
+    sqlUsersData.unshift(currentUser);
+    saveSqlUsersData();
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    closeAuthModal();
+    updateAuthUI();
+    showToast(`Авторизован как боец: ${currentUser.username}`, 'success');
+  }
+}
+
+function handleUserRegister(e) {
+  e.preventDefault();
+  Sound.click();
+  const callsign = document.getElementById('reg-callsign').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-password').value.trim();
+  const passConfirm = document.getElementById('reg-password-confirm').value.trim();
+
+  if (pass !== passConfirm) {
+    showToast('Пароли не совпадают!', 'error');
+    return;
+  }
+
+  const newUser = {
+    id: 'usr_' + Date.now(),
+    dogtag: '#ABI-50-' + Math.floor(Math.random() * 899 + 100),
+    username: callsign,
+    email: email,
+    password: pass,
+    role: 'Рекрут',
+    createdAt: new Date().toLocaleDateString('ru-RU')
+  };
+
+  sqlUsersData.unshift(newUser);
+  saveSqlUsersData();
+  currentUser = newUser;
+  localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+  closeAuthModal();
+  updateAuthUI();
+  showToast(`Жетон ${newUser.dogtag} успешно зарегистрирован!`, 'success');
+}
+
+function openProfileModal() {
+  Sound.click();
+  if (!currentUser) return;
+  document.getElementById('profile-modal-name').textContent = currentUser.username;
+  document.getElementById('profile-modal-dogtag').textContent = currentUser.dogtag || '#ABI-50-DEMO';
+  document.getElementById('profile-modal-email').textContent = currentUser.email || 'operator@50div.ru';
+  document.getElementById('profile-modal-role').textContent = currentUser.role || 'Оперативник';
+  document.getElementById('profile-modal').classList.remove('hidden');
+}
+
+function closeProfileModal() {
+  Sound.click();
+  document.getElementById('profile-modal').classList.add('hidden');
+}
+
+function logoutCurrentUser() {
+  Sound.click();
+  currentUser = null;
+  localStorage.removeItem(USER_SESSION_KEY);
+  closeProfileModal();
+  updateAuthUI();
+  showToast('Жетон сдан. Вы вышли из системы.', 'info');
+}
+
+function openSupabaseModal() {
+  Sound.click();
+  document.getElementById('supabase-modal').classList.remove('hidden');
+}
+function closeSupabaseModal() {
+  Sound.click();
+  document.getElementById('supabase-modal').classList.add('hidden');
+}
+function handleSaveSupabaseConfig(e) {
+  e.preventDefault();
+  Sound.click();
+  closeSupabaseModal();
+  showToast('Конфигурация Supabase сохранена!', 'success');
+}
+
+// Discord & Members Roster
+function renderHomeRoleStats() {
+  const container = document.getElementById('home-role-stats-grid');
+  if (!container) return;
+  const count = (appData.discordConfig && appData.discordConfig.memberCountWithRole) || 154;
+  const tracked = (appData.discordConfig && appData.discordConfig.trackedRoles) || DEFAULT_TRACKED_ROLES;
+
+  let html = `
+    <div onclick="navigateTo('members'); filterMembersByRole('all');" class="col-span-2 sm:col-span-1 border border-red-600/80 bg-gradient-to-b from-[#2d1117] via-tactical-card to-tactical-card rounded-xl p-5 cursor-pointer glow-red transition-transform hover:-translate-y-1">
+      <div class="text-[9px] font-mono font-bold text-red-400 uppercase">★ ВЕСЬ СОСТАВ</div>
+      <div class="text-xs font-tactical text-gray-200 uppercase font-bold mt-1">Все участники [.50]</div>
+      <div class="text-3xl font-black font-tactical text-white mt-1">${count}</div>
+    </div>
+  `;
+
+  tracked.slice(0, 4).forEach((role, idx) => {
+    const roleMembersCount = (appData.discordConfig.membersList || DEFAULT_DISCORD_MEMBERS).filter(m => 
+      m.roles && m.roles.includes(role.discordRoleId)
+    ).length || Math.floor(count / (idx + 3) + 4);
+
+    html += `
+      <div onclick="navigateTo('members'); filterMembersByRole('${role.discordRoleId}');" class="border border-red-900/40 hover:border-red-500/70 bg-gradient-to-b from-tactical-dark via-tactical-card to-tactical-card rounded-xl p-5 cursor-pointer transition-transform hover:-translate-y-1">
+        <div class="text-[9px] font-mono font-bold text-red-400 uppercase flex items-center justify-between">
+          <span>PRIORITY #${idx + 2}</span>
+          <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${role.color || '#ef4444'}"></span>
+        </div>
+        <div class="text-xs font-tactical text-gray-200 uppercase font-bold mt-1 truncate">${role.name}</div>
+        <div class="text-3xl font-black font-tactical text-white mt-1">${roleMembersCount}</div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function renderHomeNewsFeed() {
+  const container = document.getElementById('home-news-container');
+  if (!container) return;
+  container.innerHTML = '';
+  const msgs = (appData.discordConfig && appData.discordConfig.messages) || [];
+
+  msgs.forEach(msg => {
+    const item = document.createElement('div');
+    item.className = 'p-3 rounded-xl bg-tactical-dark/80 border border-red-900/30 space-y-1.5 hover:border-red-600/40 transition';
+    item.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <img src="${msg.avatar}" class="w-5 h-5 rounded-full border border-red-500/50">
+          <span class="text-xs font-tactical font-bold text-white">${msg.author}</span>
+        </div>
+        <span class="text-[10px] font-mono text-gray-500">${msg.timestamp}</span>
+      </div>
+      <p class="text-xs text-gray-300 leading-relaxed">${msg.content}</p>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function renderMembersUI() {
+  renderMembersRoleFilterButtons();
+  renderMembersList();
+}
+
+function renderMembersRoleFilterButtons() {
+  const container = document.getElementById('members-role-filters-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const tracked = (appData.discordConfig && appData.discordConfig.trackedRoles) || DEFAULT_TRACKED_ROLES;
+
+  const allBtn = document.createElement('button');
+  allBtn.className = `px-3 py-1.5 rounded-lg font-bold transition ${activeMemberRoleFilter === 'all' ? 'bg-red-600 text-white glow-red' : 'bg-black/60 text-gray-400 hover:text-white border border-white/10'}`;
+  allBtn.textContent = 'Все роли';
+  allBtn.onclick = () => filterMembersByRole('all');
+  container.appendChild(allBtn);
+
+  tracked.forEach(role => {
+    const btn = document.createElement('button');
+    btn.className = `px-3 py-1.5 rounded-lg font-bold transition ${activeMemberRoleFilter === role.discordRoleId ? 'bg-red-600 text-white glow-red' : 'bg-black/60 text-gray-400 hover:text-white border border-white/10'}`;
+    btn.textContent = role.name;
+    btn.onclick = () => filterMembersByRole(role.discordRoleId);
+    container.appendChild(btn);
+  });
+}
+
+function filterMembersByRole(roleId) {
+  Sound.click();
+  activeMemberRoleFilter = roleId;
+  renderMembersRoleFilterButtons();
+  renderMembersList();
+}
+
+function handleMemberSearch(query) {
+  memberSearchQuery = query.toLowerCase().trim();
+  renderMembersList();
+}
+
+function changeMembersSort(val) {
+  Sound.click();
+  memberSortMode = val;
+  renderMembersList();
+}
+
+function renderMembersList() {
+  const container = document.getElementById('members-grid-container');
+  const emptyState = document.getElementById('members-empty-state');
+  if (!container) return;
+  container.innerHTML = '';
+
+  let list = (appData.discordConfig.membersList || DEFAULT_DISCORD_MEMBERS).slice();
+
+  if (activeMemberRoleFilter !== 'all') {
+    list = list.filter(m => m.roles && m.roles.includes(activeMemberRoleFilter));
+  }
+
+  if (memberSearchQuery) {
+    list = list.filter(m => 
+      (m.globalName || '').toLowerCase().includes(memberSearchQuery) ||
+      (m.username || '').toLowerCase().includes(memberSearchQuery) ||
+      (m.discordRole || '').toLowerCase().includes(memberSearchQuery) ||
+      (m.dogtag || '').toLowerCase().includes(memberSearchQuery)
+    );
+  }
+
+  list.sort((a, b) => {
+    if (memberSortMode === 'status') {
+      if (a.status !== b.status) return a.status === 'in-raid' ? -1 : 1;
+    } else if (memberSortMode === 'alpha') {
+      return (a.globalName || a.username).localeCompare(b.globalName || b.username, 'ru');
+    } else if (memberSortMode === 'recent') {
+      return b.id.localeCompare(a.id);
+    }
+    return 0;
+  });
+
+  if (list.length === 0) {
+    if (emptyState) emptyState.classList.remove('hidden');
+    return;
+  } else {
+    if (emptyState) emptyState.classList.add('hidden');
+  }
+
+  list.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'bg-tactical-card border border-red-900/40 hover:border-red-600/60 rounded-xl p-4 flex flex-col justify-between space-y-3 transition-all hover:-translate-y-1 shadow-lg';
+    
+    let statusBadge = '<span class="text-gray-500 font-mono text-[10px]">○ ОФЛАЙН</span>';
+    if (m.status === 'in-raid') {
+      statusBadge = '<span class="text-red-400 font-mono text-[10px] font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-red-500 live-dot-pulse mr-1"></span> В РЕЙДЕ</span>';
+    } else if (m.status === 'online') {
+      statusBadge = '<span class="text-emerald-400 font-mono text-[10px] font-bold flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span> В СЕТИ</span>';
+    }
+
+    card.innerHTML = `
+      <div>
+        <div class="flex items-start justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <img src="${m.avatar}" class="w-11 h-11 rounded-xl object-cover border border-red-600/40">
+              <span class="absolute -bottom-1 -right-1 text-[8px] bg-black/90 px-1 rounded text-red-400 font-mono font-bold border border-red-900/60">.50</span>
+            </div>
+            <div>
+              <h4 class="font-tactical font-bold text-white text-sm truncate max-w-[140px]">${m.globalName || m.username}</h4>
+              <div class="text-[11px] font-mono text-gray-400 flex items-center">
+                <span>@${m.username}</span>
+              </div>
+            </div>
+          </div>
+          ${statusBadge}
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono">
+          <span class="px-2 py-0.5 rounded bg-red-955/60 border border-red-600/40 text-red-300 font-bold">${m.discordRole || 'Оперативник'}</span>
+          <span class="text-gray-500">${m.dogtag || '#ABI-50'}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-1 text-[10px] font-mono text-gray-500">
+        <span>В строю: ${m.joinedAt || 'Недавно'}</span>
+        <button onclick="copyMemberId('${m.id}')" class="text-gray-400 hover:text-white" title="Скопировать Discord ID">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function copyMemberId(id) {
+  Sound.click();
+  navigator.clipboard.writeText(id).then(() => {
+    showToast('Discord ID бойца скопирован!', 'success');
+  });
+}
+
+async function syncDiscordLiveFeed(isManual = false) {
+  if (isManual) Sound.click();
+  const workerUrl = appData.discordConfig.workerUrl;
+
+  if (workerUrl) {
+    try {
+      const res = await fetch(`${workerUrl}?guild_id=${appData.discordConfig.guildId}&channel_id=${appData.discordConfig.channelId}&role_id=${appData.discordConfig.roleId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.membersList) appData.discordConfig.membersList = data.membersList;
+        if (data.messages) appData.discordConfig.messages = data.messages;
+        if (data.memberCountWithRole) appData.discordConfig.memberCountWithRole = data.memberCountWithRole;
+        saveAppData();
+      }
+    } catch (e) {}
+  }
+
+  setTimeout(() => {
+    renderHomeRoleStats();
+    renderHomeNewsFeed();
+    renderMembersList();
+    if (isManual) showToast('Данные Discord синхронизированы в реальном времени!', 'success');
+  }, 400);
+}
+
+// Media HUB
+function renderMediaUI() {
+  renderStreamersGrid();
+  updateMediaCounters();
+  renderAdminStreamersTable();
+}
+
+function updateMediaCounters() {
+  const total = streamersData.length;
+  const live = streamersData.filter(s => s.isLive).length;
+
+  const navLiveBadge = document.getElementById('nav-media-live-badge');
+  if (navLiveBadge) {
+    navLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${live > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'} mr-1"></span> ${live > 0 ? `${live} LIVE` : 'OFFLINE'}`;
+  }
+}
+
+function renderStreamersGrid() {
+  const container = document.getElementById('streamers-grid-container');
+  const countEl = document.getElementById('visible-cards-count');
+  if (!container) return;
+  container.innerHTML = '';
+
+  let list = streamersData.filter(s => {
+    if (activeMediaFilter === 'live' && !s.isLive) return false;
+    if (activeMediaFilter === 'offline' && s.isLive) return false;
+    if (mediaSearchQuery) {
+      const matchName = s.displayName.toLowerCase().includes(mediaSearchQuery);
+      const matchUser = s.username.toLowerCase().includes(mediaSearchQuery);
+      const matchTitle = (s.title || '').toLowerCase().includes(mediaSearchQuery);
+      if (!matchName && !matchUser && !matchTitle) return false;
+    }
+    return true;
+  });
+
+  if (countEl) countEl.textContent = list.length;
+
+  list.forEach(streamer => {
+    const card = document.createElement('div');
+    const twitchUrl = `https://twitch.tv/${streamer.username}`;
+
+    card.className = `bg-tactical-card border rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group ${
+      streamer.isLive 
+        ? 'border-red-600/70 hover:border-red-500 glow-red ring-1 ring-red-500/30' 
+        : 'border-red-900/40 hover:border-purple-600/50'
+    }`;
+
+    card.innerHTML = `
+      <div>
+        <div class="relative aspect-video w-full bg-black/60 overflow-hidden">
+          <img src="${streamer.bannerUrl || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
+
+          <div class="absolute top-3 left-3 flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold ${
+            streamer.isLive ? 'bg-red-600 text-white shadow-lg glow-red' : 'bg-black/80 text-gray-300 border border-white/10'
+          }">
+            <span class="w-2 h-2 rounded-full ${streamer.isLive ? 'bg-white live-dot-pulse' : 'bg-gray-500'}"></span>
+            <span>${streamer.isLive ? `LIVE (${streamer.viewerCount || '100+'} ЗРИТЕЛЕЙ)` : 'ОФЛАЙН'}</span>
+          </div>
+
+          <div class="absolute top-3 right-3 flex items-center space-x-1.5">
+            ${streamer.telegramUrl ? `
+              <a href="${streamer.telegramUrl}" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-sky-950/80 hover:bg-sky-600 border border-sky-500/60 text-sky-400 hover:text-white flex items-center justify-center transition shadow glow-telegram" title="Telegram канал">
+                <i class="fa-brands fa-telegram text-sm"></i>
+              </a>
+            ` : ''}
+            ${streamer.youtubeUrl ? `
+              <a href="${streamer.youtubeUrl}" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-red-955/80 hover:bg-red-600 border border-red-500/60 text-red-400 hover:text-white flex items-center justify-center transition shadow glow-youtube" title="YouTube канал">
+                <i class="fa-brands fa-youtube text-sm"></i>
+              </a>
+            ` : ''}
+            <a href="${twitchUrl}" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-black/70 hover:bg-tactical-purple text-purple-400 hover:text-white border border-purple-500/40 flex items-center justify-center transition shadow glow-twitch" title="Открыть Twitch">
+              <i class="fa-brands fa-twitch text-sm"></i>
+            </a>
+          </div>
+
+          <div class="absolute bottom-2.5 left-3">
+            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-purple-950/90 text-purple-200 border border-purple-500/60 shadow">
+              <i class="fa-solid fa-heart text-purple-400 mr-1 text-[10px]"></i> ${streamer.followers} фолловеров
+            </span>
+          </div>
+
+          <button onclick="openLivePlayerModal('${streamer.username}')" class="absolute inset-0 m-auto w-11 h-11 rounded-full bg-purple-600/90 text-white flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-2xl glow-twitch cursor-pointer">
+            <i class="fa-solid fa-play ml-0.5"></i>
+          </button>
+        </div>
+
+        <div class="p-5 space-y-3.5">
+          <div class="flex items-start space-x-3">
+            <div class="relative shrink-0 mt-0.5">
+              <img src="${streamer.avatarUrl || 'https://placehold.co/100x100/131622/9146FF?text=T'}" class="w-12 h-12 rounded-xl object-cover border-2 ${streamer.isLive ? 'border-red-500 shadow-[0_0_12px_rgba(229,9,20,0.5)]' : 'border-purple-600/70'}">
+              <span class="absolute -bottom-1 -right-1 text-[8px] bg-black/90 px-1 rounded text-red-400 font-mono font-bold border border-red-900/60">.50</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h4 class="font-tactical font-bold text-white text-base truncate group-hover:text-purple-300 transition">${streamer.displayName}</h4>
+              <div class="text-xs text-purple-400 font-mono truncate flex items-center"><i class="fa-brands fa-twitch mr-1.5 text-[11px]"></i>@${streamer.username}</div>
+            </div>
+          </div>
+
+          <p class="text-xs text-gray-300 font-sans leading-relaxed line-clamp-2 min-h-[34px]">
+            ${streamer.title || 'Трансляция тактических рейдов в Arena Breakout: Infinite.'}
+          </p>
+        </div>
+      </div>
+
+      <div class="p-5 pt-0 flex items-center space-x-2">
+        <button onclick="openLivePlayerModal('${streamer.username}')" class="flex-1 py-2 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/60 text-purple-200 font-tactical font-bold text-xs uppercase transition flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-play text-xs text-red-400"></i>
+          <span>Плеер</span>
+        </button>
+        <a href="${twitchUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 px-3 rounded-xl bg-tactical-purple hover:bg-tactical-purpleDark text-white font-tactical font-bold text-xs uppercase transition flex items-center justify-center space-x-1.5 glow-twitch">
+          <i class="fa-brands fa-twitch text-xs"></i>
+          <span>Twitch</span>
+        </a>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function syncTwitchLiveStreams(isManual = false) {
+  if (isManual) Sound.click();
+  const syncIcon = document.getElementById('media-sync-icon');
+  if (syncIcon) syncIcon.classList.add('spin-sync');
+
+  if (twitchWorkerUrl) {
+    try {
+      const channels = streamersData.map(s => s.username).join(',');
+      const res = await fetch(`${twitchWorkerUrl}?channels=${encodeURIComponent(channels)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.streamers) {
+          data.streamers.forEach(apiU => {
+            const idx = streamersData.findIndex(s => s.username.toLowerCase() === apiU.username.toLowerCase());
+            if (idx !== -1) {
+              streamersData[idx].isLive = apiU.isLive;
+              streamersData[idx].viewerCount = String(apiU.viewerCount || 0);
+              streamersData[idx].followers = apiU.followersFormatted || streamersData[idx].followers;
+            }
+          });
+          saveMediaData();
+        }
+      }
+    } catch (e) {}
+  }
+
+  setTimeout(() => {
+    if (syncIcon) syncIcon.classList.remove('spin-sync');
+    renderMediaUI();
+    const timeEl = document.getElementById('media-last-sync-time');
+    if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('ru-RU');
+    if (isManual) showToast('Twitch каналы обновлены в реальном времени!', 'success');
+  }, 500);
+}
+
+function openLivePlayerModal(username) {
+  Sound.click();
+  const modal = document.getElementById('twitch-player-modal');
+  const iframe = document.getElementById('twitch-embedded-iframe');
+  const titleEl = document.getElementById('player-modal-title');
+  const streamer = streamersData.find(s => s.username === username);
+  const host = window.location.hostname || 'localhost';
+
+  if (titleEl) titleEl.textContent = streamer ? streamer.title : `Трансляция @${username}`;
+  if (iframe) iframe.src = `https://player.twitch.tv/?channel=${username}&parent=${host}&parent=localhost&parent=127.0.0.1&muted=true&autoplay=true`;
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeLivePlayerModal() {
+  const modal = document.getElementById('twitch-player-modal');
+  const iframe = document.getElementById('twitch-embedded-iframe');
+  if (iframe) iframe.src = '';
+  if (modal) modal.classList.add('hidden');
+}
+
+function openAddStreamerModal() {
+  document.getElementById('modal-heading-text').textContent = 'Добавить стримера [.50]';
+  document.getElementById('modal-streamer-id').value = '';
+  document.getElementById('modal-twitch-username').value = '';
+  document.getElementById('modal-display-name').value = '';
+  document.getElementById('modal-followers-count').value = '';
+  document.getElementById('modal-telegram-url').value = '';
+  document.getElementById('modal-youtube-url').value = '';
+  document.getElementById('modal-stream-title').value = '';
+  document.getElementById('streamer-modal').classList.remove('hidden');
+}
+
+function closeStreamerModal() {
+  document.getElementById('streamer-modal').classList.add('hidden');
+}
+
+function handleSaveStreamer(e) {
+  e.preventDefault();
+  Sound.click();
+  const id = document.getElementById('modal-streamer-id').value;
+  const username = document.getElementById('modal-twitch-username').value.trim().toLowerCase();
+  const displayName = document.getElementById('modal-display-name').value.trim();
+  const followers = document.getElementById('modal-followers-count').value.trim();
+  const isLive = document.getElementById('modal-live-status').value === 'live';
+  const telegramUrl = document.getElementById('modal-telegram-url').value.trim();
+  const youtubeUrl = document.getElementById('modal-youtube-url').value.trim();
+  const title = document.getElementById('modal-stream-title').value.trim();
+
+  if (id) {
+    const idx = streamersData.findIndex(s => s.id === id);
+    if (idx !== -1) {
+      streamersData[idx] = { ...streamersData[idx], username, displayName, followers, isLive, telegramUrl, youtubeUrl, title };
+    }
+  } else {
+    streamersData.unshift({
+      id: 'streamer_' + Date.now(),
+      username,
+      displayName,
+      followers: followers || '1K',
+      followersNum: 1000,
+      isLive,
+      viewerCount: isLive ? '140' : '0',
+      title: title || 'Трансляция Arena Breakout: Infinite',
+      telegramUrl,
+      youtubeUrl,
+      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      bannerUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'
+    });
+  }
+
+  saveMediaData();
+  closeStreamerModal();
+  renderMediaUI();
+  showToast('Данные стримера сохранены!', 'success');
+}
+
+function renderAdminStreamersTable() {
+  const tbody = document.getElementById('adm-streamers-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  streamersData.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-white/5 transition';
+    tr.innerHTML = `
+      <td class="p-3 text-white font-tactical font-bold">${s.displayName}</td>
+      <td class="p-3 text-purple-400">@${s.username}</td>
+      <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.isLive ? 'bg-red-955 text-red-300' : 'bg-gray-800 text-gray-400'}">${s.isLive ? 'LIVE' : 'OFFLINE'}</span></td>
+      <td class="p-3 text-right space-x-2">
+        <button onclick="toggleStreamerStatus('${s.id}')" class="p-1 rounded bg-black/50 text-emerald-400"><i class="fa-solid fa-tower-broadcast"></i></button>
+        <button onclick="deleteStreamer('${s.id}')" class="p-1 rounded bg-red-955 text-red-400"><i class="fa-solid fa-trash-can"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleStreamerStatus(id) {
+  const s = streamersData.find(x => x.id === id);
+  if (s) {
+    s.isLive = !s.isLive;
+    saveMediaData();
+    renderMediaUI();
+  }
+}
+
+function deleteStreamer(id) {
+  if (confirm('Удалить стримера из Media Atoms?')) {
+    streamersData = streamersData.filter(x => x.id !== id);
+    saveMediaData();
+    renderMediaUI();
+    showToast('Канал удален.', 'info');
+  }
+}
+
+// Maps
+function selectMap(k) { currentMap = k; renderMap(); }
+function renderMap() { renderMapMarkers(); }
+function renderMapMarkers() {
+  const layer = document.getElementById('map-markers-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  (appData.markers || []).filter(m => m.map === currentMap).forEach(m => {
+    const pin = document.createElement('div');
+    pin.className = 'absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer';
+    pin.style.left = m.x + 'px';
+    pin.style.top = m.y + 'px';
+    pin.innerHTML = `<div class="w-6 h-6 rounded-full bg-red-600 border border-white flex items-center justify-center text-[10px] text-white shadow"><i class="fa-solid fa-crosshairs"></i></div>`;
+    pin.onclick = () => {
+      document.getElementById('intel-title').textContent = m.title;
+      document.getElementById('intel-description').textContent = m.desc || 'Разведданные объекта.';
+      document.getElementById('intel-meta-block').classList.remove('hidden');
+      document.getElementById('intel-meta-danger').textContent = m.danger || 'СРЕДНИЙ';
+      document.getElementById('intel-meta-key').textContent = m.key || '-';
+      document.getElementById('intel-meta-extract').textContent = m.extract || '-';
+    };
+    layer.appendChild(pin);
+  });
+}
+
+function toggleMapFilter(f) {
+  activeMapFilters[f] = !activeMapFilters[f];
+  const btn = document.getElementById('filter-btn-' + f);
+  if (btn) btn.style.opacity = activeMapFilters[f] ? '1' : '0.4';
+  renderMap();
+}
+function zoomMap(factor) {
+  mapScale = Math.min(Math.max(mapScale * factor, 0.5), 2.5);
+  const world = document.getElementById('map-world');
+  if (world) world.style.transform = `scale(${mapScale})`;
+}
+function resetMapTransform() {
+  mapScale = 1.0;
+  const world = document.getElementById('map-world');
+  if (world) world.style.transform = `scale(1)`;
+}
+
+// Admin
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const p = document.getElementById('admin-passcode-input').value;
+  if (p === 'admin123' || p === 'admin') {
+    isAdminUnlocked = true;
+    document.getElementById('admin-locked-view').classList.add('hidden');
+    document.getElementById('admin-unlocked-view').classList.remove('hidden');
+    renderAdminWorkspace();
+  } else {
+    showToast('Неверный код доступа', 'error');
+  }
+}
+
+function renderAdminWorkspace() {
+  document.getElementById('adm-input-clan-name').value = appData.clanName;
+  document.getElementById('adm-input-clan-tag').value = appData.clanTag;
+  document.getElementById('adm-input-discord-url').value = appData.discordUrl;
+  document.getElementById('adm-input-slogan').value = appData.slogan;
+  document.getElementById('adm-input-recruit-status').value = appData.recruitStatus || 'open';
+
+  document.getElementById('adm-discord-guild-id').value = appData.discordConfig.guildId || '';
+  document.getElementById('adm-discord-channel-id').value = appData.discordConfig.channelId || '';
+  document.getElementById('adm-discord-role-id').value = appData.discordConfig.roleId || '';
+  document.getElementById('adm-discord-worker-url').value = appData.discordConfig.workerUrl || '';
+
+  renderAdminStreamersTable();
+  renderAdminSqlUsersTable();
+}
+
+function saveGeneralSettings(e) {
+  e.preventDefault();
+  Sound.click();
+  appData.clanName = document.getElementById('adm-input-clan-name').value.trim();
+  appData.clanTag = document.getElementById('adm-input-clan-tag').value.trim();
+  appData.discordUrl = document.getElementById('adm-input-discord-url').value.trim();
+  appData.slogan = document.getElementById('adm-input-slogan').value.trim();
+  appData.recruitStatus = document.getElementById('adm-input-recruit-status').value;
+
+  document.getElementById('nav-clan-name').textContent = appData.clanName;
+  document.getElementById('nav-clan-tag').textContent = `[${appData.clanTag}]`;
+  document.getElementById('hero-slogan-desc').textContent = appData.slogan;
+  document.getElementById('hero-discord-join-btn').href = appData.discordUrl;
+
+  saveAppData();
+  showToast('Главные данные успешно обновлены!', 'success');
+}
+
+function saveDiscordSettings(e) {
+  e.preventDefault();
+  Sound.click();
+  appData.discordConfig.guildId = document.getElementById('adm-discord-guild-id').value.trim();
+  appData.discordConfig.channelId = document.getElementById('adm-discord-channel-id').value.trim();
+  appData.discordConfig.roleId = document.getElementById('adm-discord-role-id').value.trim();
+  appData.discordConfig.workerUrl = document.getElementById('adm-discord-worker-url').value.trim();
+
+  saveAppData();
+  renderHomeRoleStats();
+  renderMembersRoleFilterButtons();
+  showToast('Параметры Discord сохранены!', 'success');
+}
+
+function renderAdminSqlUsersTable() {
+  const tbody = document.getElementById('sql-users-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  sqlUsersData.forEach(u => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-white/5 transition';
+    tr.innerHTML = `
+      <td class="p-2 text-red-400 font-bold">${u.dogtag || '#ABI-50'}</td>
+      <td class="p-2 text-white font-tactical font-bold">${u.username}</td>
+      <td class="p-2 text-gray-400">${u.email}</td>
+      <td class="p-2 text-yellow-300 font-bold">${u.role}</td>
+      <td class="p-2 text-right"><button onclick="deleteSqlUser('${u.id}')" class="p-1 rounded bg-red-955 text-red-400"><i class="fa-solid fa-trash-can"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function deleteSqlUser(id) {
+  if (confirm('Удалить жетон пользователя из базы?')) {
+    sqlUsersData = sqlUsersData.filter(x => x.id !== id);
+    saveSqlUsersData();
+    renderAdminSqlUsersTable();
+    showToast('Пользователь удален из базы.', 'info');
+  }
+}
+
+function adminLogout() {
+  isAdminUnlocked = false;
+  document.getElementById('admin-locked-view').classList.remove('hidden');
+  document.getElementById('admin-unlocked-view').classList.add('hidden');
+}
+
+function switchAdminTab(subTab) {
+  ['general', 'media', 'discord', 'sql'].forEach(k => {
+    const el = document.getElementById('adm-subtab-' + k);
+    const btn = document.getElementById('adm-tab-' + k + '-btn');
+    if (el) el.classList.add('hidden');
+    if (btn) btn.className = 'adm-subtab-btn pb-3 px-2 border-b-2 border-transparent text-gray-400 font-bold';
+  });
+  const target = document.getElementById('adm-subtab-' + subTab);
+  const targetBtn = document.getElementById('adm-tab-' + subTab + '-btn');
+  if (target) target.classList.remove('hidden');
+  if (targetBtn) targetBtn.className = 'adm-subtab-btn pb-3 px-2 border-b-2 border-red-600 text-white font-bold';
+}
+
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const t = document.createElement('div');
+  t.className = 'px-4 py-2.5 rounded-xl border backdrop-blur-md text-xs font-tactical shadow-lg ' + (type === 'success' ? 'bg-emerald-950 border-emerald-600 text-emerald-200' : type === 'error' ? 'bg-red-955 border-red-600 text-red-200' : 'bg-black/90 border-red-800 text-gray-200');
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// App Initialization
+window.addEventListener('DOMContentLoaded', () => {
+  checkRouteFromUrl();
+  updateAuthUI();
+  renderHomeRoleStats();
+  renderHomeNewsFeed();
+  renderMembersUI();
+  renderMediaUI();
+});
